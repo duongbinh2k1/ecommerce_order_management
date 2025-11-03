@@ -6,63 +6,13 @@ import datetime
 import json
 import random
 
-class Product:
-    def __init__(self, product_id, name, price, quantity_available, category, weight, supplier_id):
-        self.product_id = product_id
-        self.name = name
-        self.price = price
-        self.quantity_available = quantity_available
-        self.category = category
-        self.weight = weight
-        self.supplier_id = supplier_id
-        self.discount_eligible = True
-
-class Customer:
-    def __init__(self, customer_id, name, email, membership_tier, phone, address, loyalty_points):
-        self.customer_id = customer_id
-        self.name = name
-        self.email = email
-        self.membership_tier = membership_tier
-        self.phone = phone
-        self.address = address
-        self.loyalty_points = loyalty_points
-        self.order_history = []
-
-class OrderItem:
-    def __init__(self, product_id, quantity, unit_price):
-        self.product_id = product_id
-        self.quantity = quantity
-        self.unit_price = unit_price
-        self.discount_applied = 0
-
-class Order:
-    def __init__(self, order_id, customer_id, items, status, created_at, total_price, shipping_cost):
-        self.order_id = order_id
-        self.customer_id = customer_id
-        self.items = items
-        self.status = status
-        self.created_at = created_at
-        self.total_price = total_price
-        self.shipping_cost = shipping_cost
-        self.tracking_number = None
-        self.payment_method = None
-
-class Supplier:
-    def __init__(self, supplier_id, name, email, reliability_score):
-        self.supplier_id = supplier_id
-        self.name = name
-        self.email = email
-        self.reliability_score = reliability_score
-
-class Promotion:
-    def __init__(self, promo_id, code, discount_percent, min_purchase, valid_until, category):
-        self.promo_id = promo_id
-        self.code = code
-        self.discount_percent = discount_percent
-        self.min_purchase = min_purchase
-        self.valid_until = valid_until
-        self.category = category
-        self.used_count = 0
+# Import domain models
+from domain.models.product import Product
+from domain.models.customer import Customer
+from domain.models.order_item import OrderItem
+from domain.models.order import Order
+from domain.models.supplier import Supplier
+from domain.models.promotion import Promotion
 
 # Global storage (bad practice!)
 products = {}
