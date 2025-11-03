@@ -66,5 +66,11 @@ class Money:
     def __float__(self) -> float:
         return self.__amount
     
+    def __format__(self, format_spec: str) -> str:
+        """Support f-string formatting like {money:.2f}"""
+        if format_spec == '':
+            return str(self)
+        return format(self.__amount, format_spec)
+    
     def __hash__(self) -> int:
         return hash(self.__amount)
