@@ -3,14 +3,20 @@
 from typing import Optional
 from domain.models.customer import Customer
 from domain.enums.membership_tier import MembershipTier
+from repositories.interfaces.customer_repository import CustomerRepository
 
 
 class CustomerService:
     """Service for customer management operations."""
 
-    def __init__(self) -> None:
-        """Initialize the customer service."""
-        self.__customers: dict[str, Customer] = {}
+    def __init__(self, customer_repository: CustomerRepository) -> None:
+        """
+        Initialize the customer service.
+        
+        Args:
+            customer_repository: Repository for customer data access (DI)
+        """
+        self.__repository = customer_repository
 
     def add_customer(
         self,
@@ -44,7 +50,7 @@ class CustomerService:
             address=address,
             loyalty_points=0
         )
-        self.__customers[customer_id] = customer
+        self.__repository.add(customer)
         return customer
 
     def get_customer(self, customer_id: str) -> Optional[Customer]:
@@ -57,7 +63,7 @@ class CustomerService:
         Returns:
             The Customer if found, None otherwise
         """
-        return self.__customers.get(customer_id)
+        return self.__repository.get(customer_id)
 
     def add_loyalty_points(self, customer_id: str, points: int) -> bool:
         """
@@ -70,13 +76,13 @@ class CustomerService:
         Returns:
             True if successful, False if customer not found
         """
-        customer = self.__customers.get(customer_id)
+        customer = self.__repository.get(customer_id)
         if not customer:
             return False
 
         # Create updated customer
         new_loyalty_points = customer.loyalty_points + points
-        self.__customers[customer_id] = Customer(
+        updated_customer = Customer(
             customer_id=customer.customer_id,
             name=customer.name,
             email=customer.email.value,  # Extract primitive
@@ -85,6 +91,7 @@ class CustomerService:
             address=customer.address.value,  # Extract primitive
             loyalty_points=new_loyalty_points
         )
+        self.__repository.update(updated_customer)
         return True
 
     def upgrade_membership(
@@ -102,12 +109,12 @@ class CustomerService:
         Returns:
             True if successful, False if customer not found
         """
-        customer = self.__customers.get(customer_id)
+        customer = self.__repository.get(customer_id)
         if not customer:
             return False
 
         # Create updated customer
-        self.__customers[customer_id] = Customer(
+        updated_customer = Customer(
             customer_id=customer.customer_id,
             name=customer.name,
             email=customer.email.value,
@@ -116,7 +123,8 @@ class CustomerService:
             address=customer.address.value,
             loyalty_points=customer.loyalty_points
         )
-        print(f"Customer {customer.name} upgraded to {new_tier.value}!")
+        self.__repository.update(updated_customer)
+        print(f"Customer {customer.name} upgraded to {new_tier}!")
         return True
 
     def add_order_to_history(self, customer_id: str, order_id: str) -> bool:
@@ -130,7 +138,7 @@ class CustomerService:
         Returns:
             True if successful, False if customer not found
         """
-        customer = self.__customers.get(customer_id)
+        customer = self.__repository.get(customer_id)
         if not customer:
             return False
 
@@ -145,7 +153,7 @@ class CustomerService:
         Returns:
             Dictionary of all customers
         """
-        return self.__customers.copy()
+        return self.__repository.get_all()
 
     def auto_upgrade_membership(
         self,
@@ -162,7 +170,7 @@ class CustomerService:
         Returns:
             True if upgraded, False otherwise
         """
-        customer = self.__customers.get(customer_id)
+        customer = self.__repository.get(customer_id)
         if not customer:
             return False
 

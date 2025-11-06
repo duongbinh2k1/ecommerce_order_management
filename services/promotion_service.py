@@ -3,14 +3,20 @@
 from typing import Optional
 import datetime
 from domain.models.promotion import Promotion
+from repositories.interfaces.promotion_repository import PromotionRepository
 
 
 class PromotionService:
     """Service for promotion and discount code management."""
 
-    def __init__(self) -> None:
-        """Initialize the promotion service."""
-        self.__promotions: dict[str, Promotion] = {}
+    def __init__(self, promotion_repository: PromotionRepository) -> None:
+        """
+        Initialize the promotion service.
+        
+        Args:
+            promotion_repository: Repository for promotion data access (DI)
+        """
+        self.__repository = promotion_repository
 
     def add_promotion(
         self,
@@ -43,7 +49,7 @@ class PromotionService:
             valid_until=valid_until,
             category=category
         )
-        self.__promotions[code] = promotion
+        self.__repository.add(promotion)
         return promotion
 
     def get_promotion(self, code: str) -> Optional[Promotion]:
@@ -56,7 +62,7 @@ class PromotionService:
         Returns:
             Promotion if found and valid, None otherwise
         """
-        promotion = self.__promotions.get(code)
+        promotion = self.__repository.get(code)
         
         # Check if promotion is still valid
         if promotion and datetime.datetime.now() > promotion.valid_until:
@@ -74,7 +80,7 @@ class PromotionService:
         Returns:
             True if successful
         """
-        promotion = self.__promotions.get(code)
+        promotion = self.__repository.get(code)
         if promotion:
             promotion.used_count += 1
             return True
@@ -89,7 +95,7 @@ class PromotionService:
         """
         now = datetime.datetime.now()
         return [
-            promo for promo in self.__promotions.values()
+            promo for promo in self.__repository.get_all().values()
             if promo.valid_until > now
         ]
 
@@ -100,4 +106,4 @@ class PromotionService:
         Returns:
             Dictionary of all promotions
         """
-        return self.__promotions.copy()
+        return self.__repository.get_all()

@@ -2,14 +2,20 @@
 
 from typing import Optional
 from domain.models.supplier import Supplier
+from repositories.interfaces.supplier_repository import SupplierRepository
 
 
 class SupplierService:
     """Service for supplier management operations."""
 
-    def __init__(self) -> None:
-        """Initialize the supplier service."""
-        self.__suppliers: dict[str, Supplier] = {}
+    def __init__(self, supplier_repository: SupplierRepository) -> None:
+        """
+        Initialize the supplier service.
+        
+        Args:
+            supplier_repository: Repository for supplier data access (DI)
+        """
+        self.__repository = supplier_repository
 
     def add_supplier(
         self,
@@ -36,7 +42,7 @@ class SupplierService:
             email=email,
             reliability_score=reliability
         )
-        self.__suppliers[supplier_id] = supplier
+        self.__repository.add(supplier)
         return supplier
 
     def get_supplier(self, supplier_id: str) -> Optional[Supplier]:
@@ -49,7 +55,7 @@ class SupplierService:
         Returns:
             The Supplier if found, None otherwise
         """
-        return self.__suppliers.get(supplier_id)
+        return self.__repository.get(supplier_id)
 
     def get_reliable_suppliers(self, min_reliability: float = 0.7) -> list[Supplier]:
         """
@@ -62,7 +68,7 @@ class SupplierService:
             List of reliable suppliers
         """
         return [
-            supplier for supplier in self.__suppliers.values()
+            supplier for supplier in self.__repository.get_all().values()
             if supplier.reliability_score >= min_reliability
         ]
 
@@ -81,17 +87,18 @@ class SupplierService:
         Returns:
             True if successful, False if supplier not found
         """
-        supplier = self.__suppliers.get(supplier_id)
+        supplier = self.__repository.get(supplier_id)
         if not supplier:
             return False
 
         # Create updated supplier
-        self.__suppliers[supplier_id] = Supplier(
+        updated_supplier = Supplier(
             supplier_id=supplier.supplier_id,
             name=supplier.name,
             email=supplier.email.value,  # Extract primitive
             reliability_score=new_reliability
         )
+        self.__repository.update(updated_supplier)
         return True
 
     def get_all_suppliers(self) -> dict[str, Supplier]:
@@ -101,7 +108,7 @@ class SupplierService:
         Returns:
             Dictionary of all suppliers
         """
-        return self.__suppliers.copy()
+        return self.__repository.get_all()
 
     def notify_reorder(
         self,
@@ -120,7 +127,7 @@ class SupplierService:
         Returns:
             True if notification sent successfully
         """
-        supplier = self.__suppliers.get(supplier_id)
+        supplier = self.__repository.get(supplier_id)
         if not supplier:
             return False
 

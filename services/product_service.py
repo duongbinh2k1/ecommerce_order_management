@@ -2,14 +2,20 @@
 
 from typing import Optional
 from domain.models.product import Product
+from repositories.interfaces.product_repository import ProductRepository
 
 
 class ProductService:
     """Service for product management operations."""
 
-    def __init__(self) -> None:
-        """Initialize the product service."""
-        self.__products: dict[str, Product] = {}
+    def __init__(self, product_repository: ProductRepository) -> None:
+        """
+        Initialize the product service.
+        
+        Args:
+            product_repository: Repository for product data access (DI)
+        """
+        self.__repository = product_repository
 
     def add_product(
         self,
@@ -45,7 +51,7 @@ class ProductService:
             weight=weight,
             supplier_id=supplier_id
         )
-        self.__products[product_id] = product
+        self.__repository.add(product)
         return product
 
     def get_product(self, product_id: str) -> Optional[Product]:
@@ -58,7 +64,7 @@ class ProductService:
         Returns:
             The Product if found, None otherwise
         """
-        return self.__products.get(product_id)
+        return self.__repository.get(product_id)
 
     def update_product_price(self, product_id: str, new_price: float) -> bool:
         """
@@ -71,13 +77,13 @@ class ProductService:
         Returns:
             True if successful, False if product not found
         """
-        product = self.__products.get(product_id)
+        product = self.__repository.get(product_id)
         if not product:
             return False
 
         old_price = product.price
         # Create new product with updated price (immutability pattern)
-        self.__products[product_id] = Product(
+        updated_product = Product(
             product_id=product.product_id,
             name=product.name,
             price=new_price,
@@ -86,7 +92,8 @@ class ProductService:
             weight=product.weight,
             supplier_id=product.supplier_id
         )
-        print(f"Updated {product.name} price from ${old_price.value:.2f} to ${new_price:.2f}")
+        self.__repository.update(updated_product)
+        print(f"Updated {product.name} price from ${old_price:.2f} to ${new_price:.2f}")
         return True
 
     def get_all_products(self) -> dict[str, Product]:
@@ -96,7 +103,7 @@ class ProductService:
         Returns:
             Dictionary of all products
         """
-        return self.__products.copy()
+        return self.__repository.get_all()
 
     def update_product_quantity(self, product_id: str, new_quantity: int) -> bool:
         """
@@ -109,12 +116,12 @@ class ProductService:
         Returns:
             True if successful, False if product not found
         """
-        product = self.__products.get(product_id)
+        product = self.__repository.get(product_id)
         if not product:
             return False
 
         # Create new product with updated quantity
-        self.__products[product_id] = Product(
+        updated_product = Product(
             product_id=product.product_id,
             name=product.name,
             price=product.price.value,  # Extract primitive from Money
@@ -123,4 +130,5 @@ class ProductService:
             weight=product.weight,
             supplier_id=product.supplier_id
         )
+        self.__repository.update(updated_product)
         return True

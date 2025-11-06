@@ -8,6 +8,7 @@ from domain.enums.order_status import OrderStatus
 from domain.enums.payment_method import PaymentMethod
 from domain.enums.shipping_method import ShippingMethod
 from domain.enums.membership_tier import MembershipTier
+from repositories.interfaces.order_repository import OrderRepository
 
 if TYPE_CHECKING:
     from services.product_service import ProductService
@@ -24,6 +25,7 @@ class OrderService:
 
     def __init__(
         self,
+        order_repository: OrderRepository,
         product_service: 'ProductService',
         customer_service: 'CustomerService',
         pricing_service: 'PricingService',
@@ -32,7 +34,14 @@ class OrderService:
         notification_service: 'NotificationService',
         inventory_service: 'InventoryService'
     ) -> None:
-        """Initialize the order service with dependencies (Dependency Injection)."""
+        """
+        Initialize the order service with dependencies (Dependency Injection).
+        
+        Args:
+            order_repository: Repository for order data access
+            product_service, customer_service, etc.: Injected service dependencies
+        """
+        self.__repository = order_repository
         self.__product_service = product_service
         self.__customer_service = customer_service
         self.__pricing_service = pricing_service
@@ -40,8 +49,6 @@ class OrderService:
         self.__shipping_service = shipping_service
         self.__notification_service = notification_service
         self.__inventory_service = inventory_service
-        self.__orders: dict[str, Order] = {}
-        self.__next_order_id: int = 1000
 
     def create_order(
         self,
@@ -128,7 +135,7 @@ class OrderService:
 
         # Step 7: Validate and process payment
         payment_method_enum = PaymentMethod(payment_info.get('type', 'credit_card'))
-        order_id = str(self.__next_order_id)
+        order_id = str(self.__repository.get_next_id())
 
         is_valid, error = self.__payment_service.process_payment(
             order_id=order_id,
@@ -150,7 +157,7 @@ class OrderService:
 
         # Step 9: Create Order object
         order = Order(
-            order_id=self.__next_order_id,
+            order_id=int(order_id),
             customer_id=customer_id,
             items=order_item_objects,
             total_price=total_price,
@@ -159,8 +166,7 @@ class OrderService:
             shipping_cost=shipping_cost
         )
 
-        self.__orders[order_id] = order
-        self.__next_order_id += 1
+        self.__repository.add(order)
 
         # Step 10: Update customer order history and loyalty points
         self.__customer_service.add_order_to_history(customer_id, order_id)
@@ -196,7 +202,7 @@ class OrderService:
 
     def get_order(self, order_id: str) -> Optional[Order]:
         """Get an order by ID."""
-        return self.__orders.get(order_id)
+        return self.__repository.get(order_id)
 
     def cancel_order(self, order_id: str, reason: str) -> bool:
         """
@@ -209,7 +215,7 @@ class OrderService:
         Returns:
             True if successful
         """
-        order = self.__orders.get(order_id)
+        order = self.__repository.get(order_id)
         if not order:
             print("Order not found")
             return False
@@ -252,7 +258,7 @@ class OrderService:
         Returns:
             Tracking number or None if failed
         """
-        order = self.__orders.get(order_id)
+        order = self.__repository.get(order_id)
         if not order:
             print("Order not found")
             return None
@@ -294,14 +300,14 @@ class OrderService:
             return []
 
         return [
-            self.__orders[str(order_id)]
+            self.__repository.get(str(order_id))
             for order_id in customer.order_history
-            if str(order_id) in self.__orders
+            if self.__repository.exists(str(order_id))
         ]
 
     def get_all_orders(self) -> dict[str, Order]:
         """Get all orders."""
-        return self.__orders.copy()
+        return self.__repository.get_all()
 
     def update_order_status(
         self,
@@ -318,7 +324,7 @@ class OrderService:
         Returns:
             Updated order or None if failed
         """
-        order = self.__orders.get(order_id)
+        order = self.__repository.get(order_id)
         if not order:
             return None
 
@@ -353,7 +359,7 @@ class OrderService:
         Returns:
             Updated order or None if failed
         """
-        order = self.__orders.get(order_id)
+        order = self.__repository.get(order_id)
         if not order:
             return None
 

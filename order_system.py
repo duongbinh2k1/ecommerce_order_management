@@ -1,10 +1,20 @@
-# Legacy E-Commerce Order System - REFACTORED to use Services
-# Gradually transitioning from global state to service-based architecture
+# Legacy E-Commerce Order System - REFACTORED to use Services & Repositories
+# Phase 4: Repository Pattern - Eliminated global state
 
 import datetime
 
 # OrderItem import kept for backward compatibility with existing code
 from domain.models.order_item import OrderItem  # noqa: F401
+
+# Import repositories
+from repositories import (
+    InMemoryProductRepository,
+    InMemoryCustomerRepository,
+    InMemoryOrderRepository,
+    InMemorySupplierRepository,
+    InMemoryPromotionRepository,
+    InMemoryShipmentRepository,
+)
 
 # Import all services
 from services import (
@@ -22,18 +32,27 @@ from services import (
     MarketingService
 )
 
-# Initialize services (Dependency Injection pattern)
-product_service = ProductService()
+# Initialize repositories (Data Access Layer)
+product_repository = InMemoryProductRepository()
+customer_repository = InMemoryCustomerRepository()
+order_repository = InMemoryOrderRepository()
+supplier_repository = InMemorySupplierRepository()
+promotion_repository = InMemoryPromotionRepository()
+shipment_repository = InMemoryShipmentRepository()
+
+# Initialize services with repository injection (Dependency Injection pattern)
+product_service = ProductService(product_repository)
 inventory_service = InventoryService(product_service)
-customer_service = CustomerService()
-supplier_service = SupplierService()
-promotion_service = PromotionService()
+customer_service = CustomerService(customer_repository)
+supplier_service = SupplierService(supplier_repository)
+promotion_service = PromotionService(promotion_repository)
 pricing_service = PricingService()
-shipping_service = ShippingService()
+shipping_service = ShippingService(shipment_repository)
 payment_service = PaymentService()
 notification_service = NotificationService()
 
 order_service = OrderService(
+    order_repository=order_repository,
     product_service=product_service,
     customer_service=customer_service,
     pricing_service=pricing_service,
@@ -55,7 +74,7 @@ marketing_service = MarketingService(
 )
 
 # Legacy global storage - DEPRECATED, kept for backward compatibility
-# Will be removed after full migration to services
+# Services now use repositories internally - these dicts are just for API compatibility
 products = {}
 customers = {}
 orders = {}
