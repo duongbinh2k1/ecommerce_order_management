@@ -10,4 +10,4 @@ class OrderStatus(Enum):
     SHIPPED = 'shipped'
     DELIVERED = 'delivered'
     CANCELLED = 'cancelled'
-    IN_TRANSIT = 'in_transit'  # Used in shipment tracking
+    IN_TRANSIT = 'in_transit'
