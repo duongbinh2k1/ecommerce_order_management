@@ -20,7 +20,7 @@ class PromotionService:
 
     def add_promotion(
         self,
-        promo_id: str,
+        promo_id: int,
         code: str,
         discount: float,
         min_purchase: float,

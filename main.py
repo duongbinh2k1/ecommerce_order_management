@@ -81,10 +81,12 @@ if order3:
 
 # Update order status
 print("\n8. Shipping an order...")
-updated = order_processor.update_order_status(order1.order_id, 'shipped')
-if updated:
-    print(f"✓ Order {order1.order_id} marked as shipped")
-    print(f"  Tracking: {updated.tracking_number}")
+if order1 is not None:
+    updated = order_processor.update_order_status(order1.order_id, 'shipped')
+    if updated is not None:
+        print(f"✓ Order {order1.order_id} marked as shipped")
+        if updated.tracking_number:
+            print(f"  Tracking: {updated.tracking_number}")
 
 # Check low stock
 print("\n9. Checking inventory status...")
@@ -102,7 +104,8 @@ report = order_processor.generate_sales_report(start, end)
 print(f"Total Sales: ${report['total_sales']:.2f}")
 print(f"Total Orders: {report['total_orders']}")
 print("Revenue by Category:")
-for category, revenue in report['revenue_by_category'].items():
+revenue_by_category: dict[str, float] = report['revenue_by_category']
+for category, revenue in revenue_by_category.items():
     print(f"  {category}: ${revenue:.2f}")
 
 # Check customer lifetime values

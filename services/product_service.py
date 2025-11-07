@@ -98,7 +98,7 @@ class ProductService:
             f"Updated {product.name} price from ${old_price:.2f} to ${new_price:.2f}")
         return True
 
-    def get_all_products(self) -> dict[str, Product]:
+    def get_all_products(self) -> dict[int, Product]:
         """
         Get all products in the catalog.
 

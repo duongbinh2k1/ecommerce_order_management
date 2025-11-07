@@ -18,7 +18,7 @@ class PromotionalDiscountStrategy(DiscountStrategy):
         promotion: Optional['Promotion'],
         subtotal: float,
         order_items: list['OrderItem'],
-        products: dict[str, 'Product']
+        products: dict[int, 'Product']
     ) -> float:
         """
         Calculate promotional discount.

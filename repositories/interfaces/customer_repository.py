@@ -28,6 +28,6 @@ class CustomerRepository(Protocol):
         """Get all customers"""
         ...
 
-    def exists(self, customer_id: str) -> bool:
+    def exists(self, customer_id: int) -> bool:
         """Check if a customer exists"""
         ...

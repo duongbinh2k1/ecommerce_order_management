@@ -3,7 +3,14 @@ Application Orchestrator - Handles dependency injection and service coordination
 Replaces hardcoded dependency wiring in order_system.py
 Implements proper Dependency Injection pattern as required in Phase 5
 """
-from typing import Optional
+import datetime
+from typing import Any, Optional
+
+from domain.models.product import Product
+from domain.models.customer import Customer
+from domain.models.order import Order
+from domain.models.supplier import Supplier
+from domain.models.promotion import Promotion
 
 # Import all repositories
 from repositories import (
@@ -87,7 +94,7 @@ class OrderProcessor:
     # Public API methods for application operations
 
     def add_product(self, product_id: int, name: str, price: float, quantity: int,
-                    category: str, weight: float, supplier_id: int):
+                    category: str, weight: float, supplier_id: int) -> Product:
         """Add a product to the catalog."""
         product = self._product_service.add_product(
             product_id, name, price, quantity, category, weight, supplier_id
@@ -97,27 +104,27 @@ class OrderProcessor:
         return product
 
     def add_customer(self, customer_id: int, name: str, email: str, tier: str,
-                     phone: str, address: str):
+                     phone: str, address: str) -> Customer:
         """Add a customer to the system."""
         return self._customer_service.add_customer(
             customer_id, name, email, tier, phone, address
         )
 
-    def add_supplier(self, supplier_id: int, name: str, email: str, reliability: float):
+    def add_supplier(self, supplier_id: int, name: str, email: str, reliability: float) -> Supplier:
         """Add a supplier to the system."""
         return self._supplier_service.add_supplier(
             supplier_id, name, email, reliability
         )
 
     def add_promotion(self, promo_id: int, code: str, discount: float,
-                      min_purchase: float, valid_until, category: str):
+                      min_purchase: float, valid_until: datetime.datetime, category: str) -> Promotion:
         """Add a promotion to the system."""
         return self._promotion_service.add_promotion(
             promo_id, code, discount, min_purchase, valid_until, category
         )
 
-    def process_order(self, customer_id: int, order_items, payment_info: dict,
-                      promo_code: Optional[str] = None, shipping_method: str = 'standard'):
+    def process_order(self, customer_id: int, order_items: list[Any], payment_info: dict[str, Any],
+                      promo_code: Optional[str] = None, shipping_method: str = 'standard') -> Optional[Order]:
         """Process an order through the system."""
         # Convert order_items to expected format
         order_items_tuples = []
@@ -146,15 +153,15 @@ class OrderProcessor:
         
         return order
 
-    def update_order_status(self, order_id: int, new_status: str):
+    def update_order_status(self, order_id: int, new_status: str) -> Optional[Order]:
         """Update order status."""
-        return self._order_service.update_order_status(str(order_id), new_status)
+        return self._order_service.update_order_status(order_id, new_status)
 
-    def get_low_stock_products(self, threshold: int):
+    def get_low_stock_products(self, threshold: int) -> list[Product]:
         """Get products with low stock."""
         return self._inventory_service.get_low_stock_products(threshold)
 
-    def generate_sales_report(self, start_date, end_date):
+    def generate_sales_report(self, start_date: datetime.datetime, end_date: datetime.datetime) -> dict[str, Any]:
         """Generate sales report."""
         return self._reporting_service.generate_sales_report(start_date, end_date)
 
@@ -162,7 +169,7 @@ class OrderProcessor:
         """Get customer lifetime value."""
         return self._reporting_service.get_customer_lifetime_value(customer_id)
 
-    def get_customer(self, customer_id: int):
+    def get_customer(self, customer_id: int) -> Optional[Customer]:
         """Get customer by ID."""
         return self._customer_service.get_customer(customer_id)
 

@@ -1,6 +1,6 @@
 """Reporting Service - Handles sales reports and analytics."""
 
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 import datetime
 from domain.enums.order_status import OrderStatus
 
@@ -52,7 +52,7 @@ class ReportingService:
         self,
         start_date: datetime.datetime,
         end_date: datetime.datetime
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Generate comprehensive sales report for date range.
 
@@ -63,7 +63,7 @@ class ReportingService:
         Returns:
             Report dictionary with sales metrics
         """
-        report = {
+        report: dict[str, Any] = {
             'total_sales': 0.0,
             'total_orders': 0,
             'cancelled_orders': 0,
@@ -87,17 +87,19 @@ class ReportingService:
                         product = products.get(item.product_id)
                         if product:
                             # Count products sold
-                            if product.product_id not in report['products_sold']:
-                                report['products_sold'][product.product_id] = 0
-                            report['products_sold'][product.product_id] += item.quantity
+                            products_sold_dict: dict[int, int] = report['products_sold']
+                            if product.product_id not in products_sold_dict:
+                                products_sold_dict[product.product_id] = 0
+                            products_sold_dict[product.product_id] += item.quantity
 
                             # Revenue by category
-                            if product.category not in report['revenue_by_category']:
-                                report['revenue_by_category'][product.category] = 0.0
+                            revenue_dict: dict[str, float] = report['revenue_by_category']
+                            if product.category not in revenue_dict:
+                                revenue_dict[product.category] = 0.0
 
                             # Extract Money value
                             item_price = item.unit_price.value
-                            report['revenue_by_category'][product.category] += (
+                            revenue_dict[product.category] += (
                                 item.quantity * item_price
                             )
                 else:
@@ -108,7 +110,7 @@ class ReportingService:
 
         return report
 
-    def __get_top_customers(self, limit: int = 10) -> list[tuple[str, float]]:
+    def __get_top_customers(self, limit: int = 10) -> list[tuple[int, float]]:
         """
         Get top customers by lifetime value.
 
@@ -133,7 +135,7 @@ class ReportingService:
 
         return sorted_customers[:limit]
 
-    def get_product_performance(self) -> dict[str, int]:
+    def get_product_performance(self) -> dict[int, int]:
         """
         Get product sales performance.
 

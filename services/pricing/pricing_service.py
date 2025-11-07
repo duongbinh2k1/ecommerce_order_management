@@ -1,6 +1,6 @@
 """Pricing Service - Coordinates all discount strategies."""
 
-from typing import Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 from domain.value_objects.money import Money
 from services.pricing.strategies import (
     MembershipDiscountStrategy,
@@ -61,7 +61,7 @@ class PricingService:
         order_items: list['OrderItem'],
         products: dict[int, 'Product'],
         promotion: Optional['Promotion'] = None
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Apply all discount strategies and return pricing breakdown.
 

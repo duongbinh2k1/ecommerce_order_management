@@ -2,7 +2,7 @@
 Customer model - moved from order_system.py
 Added validation logic as per README requirements
 """
-from typing import List
+from typing import List, Optional
 from domain.value_objects.email import Email
 from domain.value_objects.phone_number import PhoneNumber
 from domain.value_objects.address import Address
@@ -19,7 +19,7 @@ class Customer:
         phone: str,
         address: str,
         loyalty_points: int,
-        order_history: List[int] = None
+        order_history: Optional[List[int]] = None
     ) -> None:
         self.__validate(name, loyalty_points)
 

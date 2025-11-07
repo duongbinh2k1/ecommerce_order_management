@@ -101,7 +101,7 @@ class SupplierService:
         self.__repository.update(updated_supplier)
         return True
 
-    def get_all_suppliers(self) -> dict[str, Supplier]:
+    def get_all_suppliers(self) -> dict[int, Supplier]:
         """
         Get all suppliers.
 

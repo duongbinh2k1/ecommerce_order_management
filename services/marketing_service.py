@@ -1,6 +1,6 @@
 """Marketing Service - Handles customer segmentation and campaigns."""
 
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 import datetime
 
 if TYPE_CHECKING:
@@ -61,7 +61,7 @@ class MarketingService:
 
     def __is_customer_inactive(
         self,
-        customer_id: str,
+        customer_id: int,
         days_threshold: int = 90
     ) -> bool:
         """
@@ -82,13 +82,13 @@ class MarketingService:
         orders = self.__order_service.get_all_orders()
 
         for order_id in customer.order_history:
-            order = orders.get(str(order_id))
+            order = orders.get(order_id)
             if order and order.created_at > cutoff:
                 return False  # Has recent order
 
         return True  # No recent orders
 
-    def get_inactive_customers(self, days_threshold: int = 90) -> list:
+    def get_inactive_customers(self, days_threshold: int = 90) -> list[int]:
         """
         Get list of inactive customers.
 
@@ -107,7 +107,7 @@ class MarketingService:
 
         return inactive
 
-    def segment_customers_by_value(self) -> dict:
+    def segment_customers_by_value(self) -> dict[str, list[int]]:
         """
         Segment customers by lifetime value.
 
@@ -117,7 +117,7 @@ class MarketingService:
         
         # Would need ReportingService injected, for now return placeholder
         return {
-            'high_value': [],  # LTV > 1000
-            'medium_value': [],  # LTV 500-1000
-            'low_value': []  # LTV < 500
+            'high_value': [],
+            'medium_value': [],
+            'low_value': []
         }

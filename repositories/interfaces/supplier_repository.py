@@ -28,6 +28,6 @@ class SupplierRepository(Protocol):
         """Get all suppliers"""
         ...
 
-    def exists(self, supplier_id: str) -> bool:
+    def exists(self, supplier_id: int) -> bool:
         """Check if a supplier exists"""
         ...

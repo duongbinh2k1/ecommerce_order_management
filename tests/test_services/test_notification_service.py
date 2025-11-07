@@ -10,7 +10,7 @@ from services.notification_service import NotificationService
 class TestNotificationService(unittest.TestCase):
     """Test NotificationService notification functionality."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test dependencies."""
         self.notification_service = NotificationService()
 
@@ -23,13 +23,13 @@ class TestNotificationService(unittest.TestCase):
 
         # Create mock order
         self.order = Mock()
-        self.order.order_id = "order_001"
+        self.order.order_id = 1
         self.order.total_price = Mock()
         self.order.total_price.value = 150.50
         self.order.status = Mock()
         self.order.status.value = "confirmed"
 
-    def test_send_order_confirmation(self):
+    def test_send_order_confirmation(self) -> None:
         """Test sending order confirmation notification."""
         self.notification_service.send_order_confirmation(
             self.customer, self.order
@@ -40,14 +40,14 @@ class TestNotificationService(unittest.TestCase):
 
         notification = log[0]
         self.assertEqual(notification['customer_id'], "cust_001")
-        self.assertEqual(notification['order_id'], "order_001")
+        self.assertEqual(notification['order_id'], 1)
         self.assertEqual(notification['type'], "order_confirmation")
         self.assertEqual(notification['total'], 150.50)
 
-    def test_send_shipment_notification(self):
+    def test_send_shipment_notification(self) -> None:
         """Test sending shipment notification."""
         self.notification_service.send_shipment_notification(
-            self.customer, "order_002", "TRACK123456"
+            self.customer, 2, "TRACK123456"
         )
 
         log = self.notification_service.get_notification_log()
@@ -55,11 +55,11 @@ class TestNotificationService(unittest.TestCase):
 
         notification = log[0]
         self.assertEqual(notification['customer_id'], "cust_001")
-        self.assertEqual(notification['order_id'], "order_002")
+        self.assertEqual(notification['order_id'], 2)
         self.assertEqual(notification['type'], "shipment")
         self.assertEqual(notification['tracking_number'], "TRACK123456")
 
-    def test_send_low_stock_alert(self):
+    def test_send_low_stock_alert(self) -> None:
         """Test sending low stock alert to supplier."""
         self.notification_service.send_low_stock_alert(
             "supplier@company.com", "Widget Pro", 5
@@ -75,7 +75,7 @@ class TestNotificationService(unittest.TestCase):
         self.assertIn("Product: Widget Pro", notification['message'])
         self.assertIn("Current stock: 5", notification['message'])
 
-    def test_send_membership_upgrade(self):
+    def test_send_membership_upgrade(self) -> None:
         """Test sending membership upgrade notification."""
         self.notification_service.send_membership_upgrade(
             self.customer, "Gold"
@@ -90,7 +90,7 @@ class TestNotificationService(unittest.TestCase):
         self.assertIn("Congratulations John Doe!", notification['message'])
         self.assertIn("Your membership has been upgraded to Gold!", notification['message'])
 
-    def test_multiple_notifications(self):
+    def test_multiple_notifications(self) -> None:
         """Test sending multiple notifications and checking log."""
         # Send order confirmation
         self.notification_service.send_order_confirmation(
@@ -99,7 +99,7 @@ class TestNotificationService(unittest.TestCase):
 
         # Send shipment notification
         self.notification_service.send_shipment_notification(
-            self.customer, "order_001", "SHIP789"
+            self.customer, 1, "SHIP789"
         )
 
         # Send membership upgrade
@@ -116,7 +116,7 @@ class TestNotificationService(unittest.TestCase):
         self.assertIn("shipment", types)
         self.assertIn("membership_upgrade", types)
 
-    def test_get_notification_log_returns_copy(self):
+    def test_get_notification_log_returns_copy(self) -> None:
         """Test that get_notification_log returns a copy."""
         self.notification_service.send_order_confirmation(
             self.customer, self.order
@@ -134,7 +134,7 @@ class TestNotificationService(unittest.TestCase):
         log3 = self.notification_service.get_notification_log()
         self.assertNotEqual(len(log1), len(log3))
 
-    def test_empty_notification_log(self):
+    def test_empty_notification_log(self) -> None:
         """Test getting notification log when no notifications sent."""
         log = self.notification_service.get_notification_log()
         

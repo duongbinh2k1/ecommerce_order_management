@@ -11,13 +11,13 @@ class InMemoryPromotionRepository:
 
     def __init__(self) -> None:
         """Initialize with empty storage"""
-        self._storage: dict[int, Promotion] = {}
+        self._storage: dict[str, Promotion] = {}
 
     def add(self, promotion: Promotion) -> None:
         """Add a new promotion to the repository"""
         self._storage[promotion.code] = promotion
 
-    def get(self, promo_code: int) -> Optional[Promotion]:
+    def get(self, promo_code: str) -> Optional[Promotion]:
         """Retrieve a promotion by code"""
         return self._storage.get(promo_code)
 
@@ -25,15 +25,15 @@ class InMemoryPromotionRepository:
         """Update an existing promotion"""
         self._storage[promotion.code] = promotion
 
-    def delete(self, promo_code: int) -> None:
+    def delete(self, promo_code: str) -> None:
         """Remove a promotion from the repository"""
         if promo_code in self._storage:
             del self._storage[promo_code]
 
-    def get_all(self) -> dict[int, Promotion]:
+    def get_all(self) -> dict[str, Promotion]:
         """Get all promotions"""
         return self._storage.copy()
 
-    def exists(self, promo_code: int) -> bool:
+    def exists(self, promo_code: str) -> bool:
         """Check if a promotion exists"""
         return promo_code in self._storage

@@ -87,7 +87,7 @@ class CustomerService:
             name=customer.name,
             email=customer.email.value,  # Extract primitive
             membership_tier=customer.membership_tier.value,  # Extract primitive
-            phone=customer.phone.value if customer.phone else "",
+            phone=customer.phone.value if customer.phone.value is not None else "",
             address=customer.address.value,  # Extract primitive
             loyalty_points=new_loyalty_points,
             order_history=customer.order_history  # Preserve order history
@@ -120,7 +120,7 @@ class CustomerService:
             name=customer.name,
             email=customer.email.value,
             membership_tier=new_tier.value,
-            phone=customer.phone.value if customer.phone else "",
+            phone=customer.phone.value if customer.phone.value is not None else "",
             address=customer.address.value,
             loyalty_points=customer.loyalty_points,
             order_history=customer.order_history  # Preserve order history
@@ -153,7 +153,7 @@ class CustomerService:
             name=customer.name,
             email=customer.email.value,  # Extract primitive
             membership_tier=customer.membership_tier.value,  # Extract primitive
-            phone=customer.phone.value if customer.phone else "",
+            phone=customer.phone.value if customer.phone.value is not None else "",
             address=customer.address.value,  # Extract primitive
             loyalty_points=customer.loyalty_points,
             order_history=customer.order_history  # Pass the updated order_history
@@ -161,7 +161,7 @@ class CustomerService:
         self.__repository.update(updated_customer)
         return True
 
-    def get_all_customers(self) -> dict[str, Customer]:
+    def get_all_customers(self) -> dict[int, Customer]:
         """
         Get all customers.
 

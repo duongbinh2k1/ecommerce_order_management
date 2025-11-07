@@ -1,14 +1,17 @@
 """Inventory Service - Manages inventory and stock operations."""
 
-from typing import Optional
+from typing import Any, Optional, TYPE_CHECKING
 import datetime
 from domain.models.product import Product
+
+if TYPE_CHECKING:
+    from services.product_service import ProductService
 
 
 class InventoryService:
     """Service for inventory management operations."""
 
-    def __init__(self, product_service) -> None:
+    def __init__(self, product_service: 'ProductService') -> None:
         """
         Initialize the inventory service.
 
@@ -16,7 +19,7 @@ class InventoryService:
             product_service: ProductService instance for product lookups
         """
         self.__product_service = product_service
-        self.__inventory_logs: list[dict] = []
+        self.__inventory_logs: list[dict[str, Any]] = []
 
     def log_inventory_change(
         self,
@@ -110,9 +113,9 @@ class InventoryService:
         product = self.__product_service.get_product(product_id)
         if not product:
             return False
-        return product.quantity_available >= required_quantity
+        return bool(product.quantity_available >= required_quantity)
 
-    def get_inventory_logs(self) -> list[dict]:
+    def get_inventory_logs(self) -> list[dict[str, Any]]:
         """
         Get all inventory change logs.
 

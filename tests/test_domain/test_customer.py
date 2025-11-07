@@ -10,10 +10,10 @@ from domain.enums.membership_tier import MembershipTier
 class TestCustomer(unittest.TestCase):
     """Test Customer domain model validation and business rules."""
 
-    def test_customer_creation_valid(self):
+    def test_customer_creation_valid(self) -> None:
         """Test creating Customer with valid data."""
         customer = Customer(
-            customer_id="123",
+            customer_id=123,
             name="John Doe",
             email="john@example.com",
             membership_tier="gold",
@@ -22,7 +22,7 @@ class TestCustomer(unittest.TestCase):
             loyalty_points=100
         )
         
-        self.assertEqual(customer.customer_id, "123")
+        self.assertEqual(customer.customer_id, 123)
         self.assertEqual(customer.name, "John Doe")
         self.assertEqual(customer.email.value, "john@example.com")
         self.assertEqual(customer.membership_tier, MembershipTier.GOLD)
@@ -30,11 +30,11 @@ class TestCustomer(unittest.TestCase):
         self.assertEqual(customer.address.value, "123 Main St")
         self.assertEqual(customer.loyalty_points, 100)
 
-    def test_customer_validation_invalid_email(self):
+    def test_customer_validation_invalid_email(self) -> None:
         """Test Customer validation - should reject invalid email."""
         with self.assertRaises(ValueError):
             Customer(
-                customer_id="123",
+                customer_id=123,
                 name="John Doe",
                 email="invalid-email",  # Invalid email format
                 membership_tier="gold",
@@ -43,11 +43,11 @@ class TestCustomer(unittest.TestCase):
                 loyalty_points=100
             )
 
-    def test_customer_validation_empty_name(self):
+    def test_customer_validation_empty_name(self) -> None:
         """Test Customer validation - should reject empty name."""
         with self.assertRaises(ValueError):
             Customer(
-                customer_id="123",
+                customer_id=123,
                 name="",  # Invalid empty name
                 email="john@example.com",
                 membership_tier="gold",
@@ -56,11 +56,11 @@ class TestCustomer(unittest.TestCase):
                 loyalty_points=100
             )
 
-    def test_customer_validation_negative_loyalty_points(self):
+    def test_customer_validation_negative_loyalty_points(self) -> None:
         """Test Customer validation - should reject negative loyalty points."""
         with self.assertRaises(ValueError):
             Customer(
-                customer_id="123",
+                customer_id=123,
                 name="John Doe",
                 email="john@example.com",
                 membership_tier="gold",
@@ -69,11 +69,11 @@ class TestCustomer(unittest.TestCase):
                 loyalty_points=-10  # Invalid negative loyalty points
             )
 
-    def test_customer_validation_invalid_membership_tier(self):
+    def test_customer_validation_invalid_membership_tier(self) -> None:
         """Test Customer validation - should reject invalid membership tier."""
         with self.assertRaises(ValueError):
             Customer(
-                customer_id="123",
+                customer_id=123,
                 name="John Doe",
                 email="john@example.com",
                 membership_tier="invalid_tier",  # Invalid tier
@@ -82,11 +82,11 @@ class TestCustomer(unittest.TestCase):
                 loyalty_points=100
             )
 
-    def test_customer_membership_tiers(self):
+    def test_customer_membership_tiers(self) -> None:
         """Test different membership tiers."""
         # Gold member
         gold_customer = Customer(
-            customer_id="1",
+            customer_id=1,
             name="Gold Member",
             email="gold@example.com",
             membership_tier="gold",
@@ -98,7 +98,7 @@ class TestCustomer(unittest.TestCase):
         
         # Silver member
         silver_customer = Customer(
-            customer_id="2",
+            customer_id=2,
             name="Silver Member",
             email="silver@example.com",
             membership_tier="silver",
@@ -110,7 +110,7 @@ class TestCustomer(unittest.TestCase):
         
         # Standard member
         standard_customer = Customer(
-            customer_id="3",
+            customer_id=3,
             name="Standard Member",
             email="standard@example.com",
             membership_tier="standard",
@@ -120,10 +120,10 @@ class TestCustomer(unittest.TestCase):
         )
         self.assertEqual(standard_customer.membership_tier, MembershipTier.STANDARD)
 
-    def test_customer_object_attributes(self):
+    def test_customer_object_attributes(self) -> None:
         """Test Customer object creation and attributes."""
         customer = Customer(
-            customer_id="123",
+            customer_id=123,
             name="John Doe",
             email="john@example.com",
             membership_tier="gold",
@@ -134,7 +134,7 @@ class TestCustomer(unittest.TestCase):
         
         # Test object attributes
         self.assertEqual(customer.name, "John Doe")
-        self.assertEqual(customer.customer_id, "123")
+        self.assertEqual(customer.customer_id, 123)
         self.assertEqual(customer.loyalty_points, 100)
 
 

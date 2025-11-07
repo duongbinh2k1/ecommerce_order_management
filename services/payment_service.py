@@ -1,6 +1,6 @@
 """Payment Service - Handles payment validation and processing."""
 
-from typing import Optional
+from typing import Any, Optional
 from domain.enums.payment_method import PaymentMethod
 
 
@@ -9,12 +9,12 @@ class PaymentService:
 
     def __init__(self) -> None:
         """Initialize the payment service."""
-        self.__payment_history: list[dict] = []
+        self.__payment_history: list[dict[str, Any]] = []
 
     def validate_payment(
         self,
         payment_method: PaymentMethod,
-        payment_info: dict
+        payment_info: dict[str, Any]
     ) -> tuple[bool, Optional[str]]:
         """
         Validate payment information.
@@ -43,10 +43,10 @@ class PaymentService:
 
     def process_payment(
         self,
-        order_id: str,
+        order_id: int,
         amount: float,
         payment_method: PaymentMethod,
-        payment_info: dict
+        payment_info: dict[str, Any]
     ) -> tuple[bool, Optional[str]]:
         """
         Process payment for an order.
@@ -77,7 +77,7 @@ class PaymentService:
 
     def process_refund(
         self,
-        order_id: str,
+        order_id: int,
         amount: float,
         reason: str
     ) -> bool:
@@ -107,7 +107,7 @@ class PaymentService:
 
         return False
 
-    def get_payment_history(self, order_id: str) -> list[dict]:
+    def get_payment_history(self, order_id: int) -> list[dict[str, Any]]:
         """
         Get payment history for an order.
 

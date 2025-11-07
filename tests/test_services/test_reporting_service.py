@@ -9,7 +9,7 @@ from domain.enums.order_status import OrderStatus
 class TestReportingService(unittest.TestCase):
     """Test cases for ReportingService class."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test dependencies."""
         self.customer_service = Mock()
         self.order_service = Mock()
@@ -21,7 +21,7 @@ class TestReportingService(unittest.TestCase):
             product_service=self.product_service
         )
 
-    def test_get_customer_lifetime_value_with_orders(self):
+    def test_get_customer_lifetime_value_with_orders(self) -> None:
         """Test customer lifetime value calculation with orders."""
         # Create customer with order history
         customer = Mock()
@@ -58,7 +58,7 @@ class TestReportingService(unittest.TestCase):
         self.assertEqual(ltv, 300.0)
         self.customer_service.get_customer.assert_called_once_with(101)
 
-    def test_get_customer_lifetime_value_customer_not_found(self):
+    def test_get_customer_lifetime_value_customer_not_found(self) -> None:
         """Test LTV calculation when customer not found."""
         self.customer_service.get_customer.return_value = None
         
@@ -67,7 +67,7 @@ class TestReportingService(unittest.TestCase):
         self.assertEqual(ltv, 0.0)
         self.customer_service.get_customer.assert_called_once_with(999)
 
-    def test_get_customer_lifetime_value_no_orders(self):
+    def test_get_customer_lifetime_value_no_orders(self) -> None:
         """Test LTV calculation for customer with no orders."""
         customer = Mock()
         customer.customer_id = 102
@@ -78,7 +78,7 @@ class TestReportingService(unittest.TestCase):
         
         self.assertEqual(ltv, 0.0)
 
-    def test_generate_sales_report_basic(self):
+    def test_generate_sales_report_basic(self) -> None:
         """Test basic sales report generation."""
         start_date = datetime(2024, 1, 1)
         end_date = datetime(2024, 1, 31)
@@ -112,7 +112,7 @@ class TestReportingService(unittest.TestCase):
         self.assertEqual(report['total_orders'], 2)
         self.assertEqual(report['cancelled_orders'], 0)
 
-    def test_generate_sales_report_with_cancelled_orders(self):
+    def test_generate_sales_report_with_cancelled_orders(self) -> None:
         """Test sales report with cancelled orders."""
         start_date = datetime.now() - timedelta(days=7)
         end_date = datetime.now()
@@ -146,7 +146,7 @@ class TestReportingService(unittest.TestCase):
         self.assertEqual(report['total_orders'], 1)
         self.assertEqual(report['cancelled_orders'], 1)
 
-    def test_generate_sales_report_empty_date_range(self):
+    def test_generate_sales_report_empty_date_range(self) -> None:
         """Test sales report with no orders in date range."""
         start_date = datetime.now() + timedelta(days=1)  # Future date
         end_date = datetime.now() + timedelta(days=7)

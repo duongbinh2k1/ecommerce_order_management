@@ -1,6 +1,6 @@
 """Order Service - Handles order creation and management."""
 
-from typing import Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 import datetime
 from domain.models.order import Order
 from domain.models.order_item import OrderItem
@@ -58,7 +58,7 @@ class OrderService:
         customer_id: int,
         # (product_id, quantity, unit_price)
         order_items: list[tuple[int, int, float]],
-        payment_info: dict,
+        payment_info: dict[str, Any],
         promo_code: Optional[str] = None,
         shipping_method: str = 'standard'
     ) -> Optional[Order]:
@@ -148,7 +148,7 @@ class OrderService:
         order_id = self.__repository.get_next_id()
 
         is_valid, error = self.__payment_service.process_payment(
-            order_id=str(order_id),
+            order_id=order_id,
             amount=total_price,
             payment_method=payment_method_enum,
             payment_info=payment_info
@@ -211,11 +211,11 @@ class OrderService:
 
         return subtotal * tax_rate
 
-    def get_order(self, order_id: str) -> Optional[Order]:
+    def get_order(self, order_id: int) -> Optional[Order]:
         """Get an order by ID."""
         return self.__repository.get(order_id)
 
-    def cancel_order(self, order_id: str, reason: str) -> bool:
+    def cancel_order(self, order_id: int, reason: str) -> bool:
         """
         Cancel an order and refund payment.
 
@@ -237,7 +237,7 @@ class OrderService:
 
         # Restore inventory
         products = self.__product_service.get_all_products()
-        for item in order.order_items:
+        for item in order.items:
             product = products.get(item.product_id)
             if product:
                 new_quantity = product.quantity_available + item.quantity
@@ -260,7 +260,7 @@ class OrderService:
         print(f"Order {order_id} cancelled: {reason}")
         return True
 
-    def ship_order(self, order_id: str) -> Optional[str]:
+    def ship_order(self, order_id: int) -> Optional[str]:
         """
         Ship an order and generate tracking number.
 
@@ -270,13 +270,7 @@ class OrderService:
         Returns:
             Tracking number or None if failed
         """
-        # Convert string order_id to int for repository lookup
-        try:
-            order_id_int = int(order_id)
-        except ValueError:
-            return None
-            
-        order = self.__repository.get(order_id_int)
+        order = self.__repository.get(order_id)
         if not order:
             print("Order not found")
             return None
@@ -286,9 +280,10 @@ class OrderService:
             return None
 
         # Create shipment
+        from domain.enums.shipping_method import ShippingMethod
         tracking_number = self.__shipping_service.create_shipment(
             order_id=order_id,
-            shipping_method='standard',  # TODO: Add shipping_method to Order model
+            shipping_method=ShippingMethod.STANDARD,  # TODO: Add shipping_method to Order model
             address=customer.address.value
         )
 
@@ -298,7 +293,7 @@ class OrderService:
         # Note: Order status would need to be updated via setter or recreation
         return tracking_number
 
-    def get_customer_orders(self, customer_id: str) -> list[Order]:
+    def get_customer_orders(self, customer_id: int) -> list[Order]:
         """
         Get all orders for a customer.
 
@@ -313,9 +308,9 @@ class OrderService:
             return []
 
         return [
-            self.__repository.get(str(order_id))
+            order
             for order_id in customer.order_history
-            if self.__repository.exists(str(order_id))
+            if (order := self.__repository.get(order_id)) is not None
         ]
 
     def get_all_orders(self) -> dict[int, Order]:
@@ -324,7 +319,7 @@ class OrderService:
 
     def update_order_status(
         self,
-        order_id: str,
+        order_id: int,
         new_status: str
     ) -> Optional[Order]:
         """
@@ -337,13 +332,7 @@ class OrderService:
         Returns:
             Updated order or None if failed
         """
-        # Convert string order_id to int for repository lookup
-        try:
-            order_id_int = int(order_id)
-        except ValueError:
-            return None
-            
-        order = self.__repository.get(order_id_int)
+        order = self.__repository.get(order_id)
         if not order:
             return None
 
@@ -367,7 +356,7 @@ class OrderService:
 
     def apply_additional_discount(
         self,
-        order_id: str,
+        order_id: int,
         discount_percent: float,
         reason: str
     ) -> Optional[Order]:

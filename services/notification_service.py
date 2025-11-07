@@ -1,6 +1,6 @@
 """Notification Service - Handles customer notifications."""
 
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from domain.models.customer import Customer
@@ -12,7 +12,7 @@ class NotificationService:
 
     def __init__(self) -> None:
         """Initialize the notification service."""
-        self.__notification_log: list[dict] = []
+        self.__notification_log: list[dict[str, Any]] = []
 
     def send_order_confirmation(
         self,
@@ -41,7 +41,7 @@ class NotificationService:
     def send_shipment_notification(
         self,
         customer: 'Customer',
-        order_id: str,
+        order_id: int,
         tracking_number: str
     ) -> None:
         """
@@ -115,7 +115,7 @@ class NotificationService:
             'message': message
         })
 
-    def get_notification_log(self) -> list[dict]:
+    def get_notification_log(self) -> list[dict[str, Any]]:
         """
         Get all notification logs.
 

@@ -10,43 +10,43 @@ from services.inventory_service import InventoryService
 class TestInventoryService(unittest.TestCase):
     """Test InventoryService inventory management functionality."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test dependencies."""
         self.product_service = Mock()
         self.inventory_service = InventoryService(self.product_service)
 
         # Create mock product
         self.product = Mock()
-        self.product.product_id = "prod_001"
+        self.product.product_id = 1
         self.product.name = "Test Product"
         self.product.quantity_available = 50
-        self.product.supplier_id = "supplier_001"
+        self.product.supplier_id = 1
 
-    def test_log_inventory_change(self):
+    def test_log_inventory_change(self) -> None:
         """Test logging inventory changes."""
         self.inventory_service.log_inventory_change(
-            "prod_001", 10, "restock"
+            1, 10, "restock"
         )
 
         logs = self.inventory_service.get_inventory_logs()
         self.assertEqual(len(logs), 1)
 
         log_entry = logs[0]
-        self.assertEqual(log_entry['product_id'], "prod_001")
+        self.assertEqual(log_entry['product_id'], 1)
         self.assertEqual(log_entry['quantity_change'], 10)
         self.assertEqual(log_entry['reason'], "restock")
         self.assertIn('timestamp', log_entry)
 
-    def test_restock_product_success(self):
+    def test_restock_product_success(self) -> None:
         """Test successful product restocking."""
         self.product_service.get_product.return_value = self.product
 
-        result = self.inventory_service.restock_product("prod_001", 20)
+        result = self.inventory_service.restock_product(1, 20)
 
         self.assertTrue(result)
-        self.product_service.get_product.assert_called_once_with("prod_001")
+        self.product_service.get_product.assert_called_once_with(1)
         self.product_service.update_product_quantity.assert_called_once_with(
-            "prod_001", 70  # 50 + 20
+            1, 70  # 50 + 20
         )
 
         # Check log was created
@@ -54,41 +54,41 @@ class TestInventoryService(unittest.TestCase):
         self.assertEqual(len(logs), 1)
         self.assertEqual(logs[0]['reason'], "restock")
 
-    def test_restock_product_not_found(self):
+    def test_restock_product_not_found(self) -> None:
         """Test restocking non-existent product."""
         self.product_service.get_product.return_value = None
 
-        result = self.inventory_service.restock_product("nonexistent", 20)
+        result = self.inventory_service.restock_product(999, 20)
 
         self.assertFalse(result)
-        self.product_service.get_product.assert_called_once_with("nonexistent")
+        self.product_service.get_product.assert_called_once_with(999)
         self.product_service.update_product_quantity.assert_not_called()
 
-    def test_restock_product_supplier_mismatch(self):
+    def test_restock_product_supplier_mismatch(self) -> None:
         """Test restocking with wrong supplier."""
         self.product_service.get_product.return_value = self.product
 
         result = self.inventory_service.restock_product(
-            "prod_001", 20, "wrong_supplier"
+            1, 20, 999
         )
 
         self.assertFalse(result)
         self.product_service.update_product_quantity.assert_not_called()
 
-    def test_restock_product_with_correct_supplier(self):
+    def test_restock_product_with_correct_supplier(self) -> None:
         """Test restocking with correct supplier."""
         self.product_service.get_product.return_value = self.product
 
         result = self.inventory_service.restock_product(
-            "prod_001", 15, "supplier_001"
+            1, 15, 1
         )
 
         self.assertTrue(result)
         self.product_service.update_product_quantity.assert_called_once_with(
-            "prod_001", 65  # 50 + 15
+            1, 65  # 50 + 15
         )
 
-    def test_get_low_stock_products_default_threshold(self):
+    def test_get_low_stock_products_default_threshold(self) -> None:
         """Test getting low stock products with default threshold."""
         low_stock_product = Mock()
         low_stock_product.quantity_available = 5
@@ -97,8 +97,8 @@ class TestInventoryService(unittest.TestCase):
         normal_stock_product.quantity_available = 15
 
         self.product_service.get_all_products.return_value = {
-            "prod_001": low_stock_product,
-            "prod_002": normal_stock_product
+            1: low_stock_product,
+            2: normal_stock_product
         }
 
         low_stock = self.inventory_service.get_low_stock_products()
@@ -106,7 +106,7 @@ class TestInventoryService(unittest.TestCase):
         self.assertEqual(len(low_stock), 1)
         self.assertEqual(low_stock[0], low_stock_product)
 
-    def test_get_low_stock_products_custom_threshold(self):
+    def test_get_low_stock_products_custom_threshold(self) -> None:
         """Test getting low stock products with custom threshold."""
         product1 = Mock()
         product1.quantity_available = 5
@@ -118,9 +118,9 @@ class TestInventoryService(unittest.TestCase):
         product3.quantity_available = 25
 
         self.product_service.get_all_products.return_value = {
-            "prod_001": product1,
-            "prod_002": product2,
-            "prod_003": product3
+            1: product1,
+            2: product2,
+            3: product3
         }
 
         # Test with threshold of 20
@@ -128,7 +128,7 @@ class TestInventoryService(unittest.TestCase):
 
         self.assertEqual(len(low_stock), 2)  # Products with 5 and 15 quantity
 
-    def test_get_low_stock_products_no_low_stock(self):
+    def test_get_low_stock_products_no_low_stock(self) -> None:
         """Test getting low stock products when none are low."""
         product1 = Mock()
         product1.quantity_available = 50
@@ -137,58 +137,58 @@ class TestInventoryService(unittest.TestCase):
         product2.quantity_available = 100
 
         self.product_service.get_all_products.return_value = {
-            "prod_001": product1,
-            "prod_002": product2
+            1: product1,
+            2: product2
         }
 
         low_stock = self.inventory_service.get_low_stock_products()
 
         self.assertEqual(len(low_stock), 0)
 
-    def test_check_product_availability_sufficient_stock(self):
+    def test_check_product_availability_sufficient_stock(self) -> None:
         """Test checking product availability with sufficient stock."""
         self.product_service.get_product.return_value = self.product
 
         available = self.inventory_service.check_product_availability(
-            "prod_001", 30
+            1, 30
         )
 
         self.assertTrue(available)
-        self.product_service.get_product.assert_called_once_with("prod_001")
+        self.product_service.get_product.assert_called_once_with(1)
 
-    def test_check_product_availability_insufficient_stock(self):
+    def test_check_product_availability_insufficient_stock(self) -> None:
         """Test checking product availability with insufficient stock."""
         self.product_service.get_product.return_value = self.product
 
         available = self.inventory_service.check_product_availability(
-            "prod_001", 100  # More than the 50 available
+            1, 100  # More than the 50 available
         )
 
         self.assertFalse(available)
 
-    def test_check_product_availability_exact_stock(self):
+    def test_check_product_availability_exact_stock(self) -> None:
         """Test checking product availability with exact stock."""
         self.product_service.get_product.return_value = self.product
 
         available = self.inventory_service.check_product_availability(
-            "prod_001", 50  # Exactly the amount available
+            1, 50  # Exactly the amount available
         )
 
         self.assertTrue(available)
 
-    def test_check_product_availability_product_not_found(self):
+    def test_check_product_availability_product_not_found(self) -> None:
         """Test checking availability for non-existent product."""
         self.product_service.get_product.return_value = None
 
         available = self.inventory_service.check_product_availability(
-            "nonexistent", 10
+            999, 10
         )
 
         self.assertFalse(available)
 
-    def test_get_inventory_logs_returns_copy(self):
+    def test_get_inventory_logs_returns_copy(self) -> None:
         """Test that get_inventory_logs returns a copy."""
-        self.inventory_service.log_inventory_change("prod_001", 10, "test")
+        self.inventory_service.log_inventory_change(1, 10, "test")
 
         logs1 = self.inventory_service.get_inventory_logs()
         logs2 = self.inventory_service.get_inventory_logs()
@@ -202,11 +202,11 @@ class TestInventoryService(unittest.TestCase):
         logs3 = self.inventory_service.get_inventory_logs()
         self.assertNotEqual(len(logs1), len(logs3))
 
-    def test_multiple_inventory_changes(self):
+    def test_multiple_inventory_changes(self) -> None:
         """Test logging multiple inventory changes."""
-        self.inventory_service.log_inventory_change("prod_001", 10, "restock")
-        self.inventory_service.log_inventory_change("prod_002", -5, "sale")
-        self.inventory_service.log_inventory_change("prod_001", 20, "initial_stock")
+        self.inventory_service.log_inventory_change(1, 10, "restock")
+        self.inventory_service.log_inventory_change(2, -5, "sale")
+        self.inventory_service.log_inventory_change(1, 20, "initial_stock")
 
         logs = self.inventory_service.get_inventory_logs()
         self.assertEqual(len(logs), 3)

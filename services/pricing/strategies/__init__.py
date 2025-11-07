@@ -1,13 +1,14 @@
 """Discount strategies package - Strategy Pattern implementation."""
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class DiscountStrategy(ABC):
     """Abstract base class for discount strategies (Open/Closed Principle)."""
 
     @abstractmethod
-    def calculate_discount(self, *args, **kwargs):
+    def calculate_discount(self, *args: Any, **kwargs: Any) -> Any:  # Can return float or tuple
         """
         Calculate discount amount.
 

@@ -2,7 +2,7 @@
 Shipment Repository Interface - defines contract for shipment data access
 Note: Shipment is dict-based (not a domain model yet)
 """
-from typing import Protocol, Optional
+from typing import Any, Protocol, Optional
 
 
 class ShipmentRepository(Protocol):
@@ -11,27 +11,27 @@ class ShipmentRepository(Protocol):
     Note: Uses dict instead of domain model (legacy compatibility).
     """
 
-    def add(self, shipment: dict) -> None:
+    def add(self, shipment: dict[str, Any]) -> None:
         """Add a new shipment"""
         ...
 
-    def get(self, shipment_id: str) -> Optional[dict]:
+    def get(self, shipment_id: int) -> Optional[dict[str, Any]]:
         """Retrieve a shipment by ID"""
         ...
 
-    def update(self, shipment: dict) -> None:
+    def update(self, shipment: dict[str, Any]) -> None:
         """Update an existing shipment"""
         ...
 
-    def delete(self, shipment_id: str) -> None:
+    def delete(self, shipment_id: int) -> None:
         """Remove a shipment"""
         ...
 
-    def get_all(self) -> dict[str, dict]:
+    def get_all(self) -> dict[int, dict[str, Any]]:
         """Get all shipments"""
         ...
 
-    def exists(self, shipment_id: str) -> bool:
+    def exists(self, shipment_id: int) -> bool:
         """Check if a shipment exists"""
         ...
 
