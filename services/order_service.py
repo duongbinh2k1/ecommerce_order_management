@@ -270,7 +270,13 @@ class OrderService:
         Returns:
             Tracking number or None if failed
         """
-        order = self.__repository.get(order_id)
+        # Convert string order_id to int for repository lookup
+        try:
+            order_id_int = int(order_id)
+        except ValueError:
+            return None
+            
+        order = self.__repository.get(order_id_int)
         if not order:
             print("Order not found")
             return None
@@ -331,7 +337,13 @@ class OrderService:
         Returns:
             Updated order or None if failed
         """
-        order = self.__repository.get(order_id)
+        # Convert string order_id to int for repository lookup
+        try:
+            order_id_int = int(order_id)
+        except ValueError:
+            return None
+            
+        order = self.__repository.get(order_id_int)
         if not order:
             return None
 

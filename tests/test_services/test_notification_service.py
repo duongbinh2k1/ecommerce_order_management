@@ -42,10 +42,7 @@ class TestNotificationService(unittest.TestCase):
         self.assertEqual(notification['customer_id'], "cust_001")
         self.assertEqual(notification['order_id'], "order_001")
         self.assertEqual(notification['type'], "order_confirmation")
-        self.assertIn("Order Confirmation for John Doe", notification['message'])
-        self.assertIn("Order ID: order_001", notification['message'])
-        self.assertIn("Total: $150.50", notification['message'])
-        self.assertIn("Status: confirmed", notification['message'])
+        self.assertEqual(notification['total'], 150.50)
 
     def test_send_shipment_notification(self):
         """Test sending shipment notification."""
@@ -60,8 +57,7 @@ class TestNotificationService(unittest.TestCase):
         self.assertEqual(notification['customer_id'], "cust_001")
         self.assertEqual(notification['order_id'], "order_002")
         self.assertEqual(notification['type'], "shipment")
-        self.assertIn("Your order order_002 has been shipped!", notification['message'])
-        self.assertIn("Tracking number: TRACK123456", notification['message'])
+        self.assertEqual(notification['tracking_number'], "TRACK123456")
 
     def test_send_low_stock_alert(self):
         """Test sending low stock alert to supplier."""

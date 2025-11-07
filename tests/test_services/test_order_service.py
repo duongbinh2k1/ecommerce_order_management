@@ -188,17 +188,19 @@ class TestOrderService(unittest.TestCase):
     def test_update_order_status_success(self):
         """Test successful order status update."""
         mock_order = Mock()
-        mock_order.order_id = "order_001"
+        mock_order.order_id = 1  # Use int to match conversion
         mock_order.customer_id = "cust_001"
         mock_order.status = OrderStatus.PENDING
         
         self.order_repository.get.return_value = mock_order
         self.customer_service.get_customer.return_value = self.customer
         
-        result = self.order_service.update_order_status("order_001", "shipped")
+        result = self.order_service.update_order_status("1", "shipped")
         
         # Method returns order, not boolean, and may call customer service multiple times
         self.assertEqual(result, mock_order)
+        # Repository should be called with int ID after conversion
+        self.order_repository.get.assert_called_with(1)
         # Customer service may be called multiple times due to shipping logic
         self.assertGreaterEqual(self.customer_service.get_customer.call_count, 1)
 

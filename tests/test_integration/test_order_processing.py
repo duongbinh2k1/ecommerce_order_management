@@ -30,15 +30,15 @@ class TestOrderProcessingIntegration(unittest.TestCase):
 
     def _setup_test_products(self):
         """Set up test products."""
-        self.app.add_product("1", "Test Laptop", 999.99, 10, "Electronics", 2.5, "1")
-        self.app.add_product("2", "Test Mouse", 29.99, 50, "Electronics", 0.2, "2")
-        self.app.add_product("3", "Test Keyboard", 79.99, 30, "Electronics", 1.0, "2")
+        self.app.add_product(1, "Test Laptop", 999.99, 10, "Electronics", 2.5, "1")
+        self.app.add_product(2, "Test Mouse", 29.99, 50, "Electronics", 0.2, "2")
+        self.app.add_product(3, "Test Keyboard", 79.99, 30, "Electronics", 1.0, "2")
 
     def _setup_test_customers(self):
         """Set up test customers."""
-        self.app.add_customer("101", "Alice Gold", "alice@test.com", "gold", "555-0101", "123 Test St")
-        self.app.add_customer("102", "Bob Silver", "bob@test.com", "silver", "555-0102", "456 Test Ave")
-        self.app.add_customer("103", "Charlie Standard", "charlie@test.com", "standard", "555-0103", "789 Test Rd")
+        self.app.add_customer(101, "Alice Gold", "alice@test.com", "gold", "555-0101", "123 Test St")
+        self.app.add_customer(102, "Bob Silver", "bob@test.com", "silver", "555-0102", "456 Test Ave")
+        self.app.add_customer(103, "Charlie Standard", "charlie@test.com", "standard", "555-0103", "789 Test Rd")
 
     def _setup_test_promotions(self):
         """Set up test promotions."""
@@ -62,11 +62,11 @@ class TestOrderProcessingIntegration(unittest.TestCase):
         }
         
         # Process order
-        order = self.app.process_order("101", items, payment, shipping_method='standard')
+        order = self.app.process_order(101, items, payment, shipping_method='standard')
         
         # Verify order was created
         self.assertIsNotNone(order)
-        self.assertEqual(order.customer_id, "101")
+        self.assertEqual(order.customer_id, 101)
         self.assertEqual(order.status, OrderStatus.PENDING)
         self.assertGreater(order.total_price, 0)
         
@@ -89,11 +89,11 @@ class TestOrderProcessingIntegration(unittest.TestCase):
         }
         
         # Process order with promotion
-        order = self.app.process_order("102", items, payment, promo_code="TEST10")
+        order = self.app.process_order(102, items, payment, promo_code="TEST10")
         
         # Verify order was created with discount
         self.assertIsNotNone(order)
-        self.assertEqual(order.customer_id, "102")
+        self.assertEqual(order.customer_id, 102)
         # Order total should be less than full price due to promotion
         self.assertLess(order.total_price, 999.99 + 15.00)  # Less than laptop + standard shipping
 
@@ -113,7 +113,7 @@ class TestOrderProcessingIntegration(unittest.TestCase):
         }
         
         # Process order - should fail
-        order = self.app.process_order("103", items, payment)
+        order = self.app.process_order(103, items, payment)
         
         # Verify order was not created
         self.assertIsNone(order)
@@ -134,7 +134,7 @@ class TestOrderProcessingIntegration(unittest.TestCase):
         }
         
         # Process order - should fail
-        order = self.app.process_order("103", items, payment)
+        order = self.app.process_order(103, items, payment)
         
         # Verify order was not created
         self.assertIsNone(order)
@@ -159,7 +159,7 @@ class TestOrderProcessingIntegration(unittest.TestCase):
         }
         
         # Process order with expired promotion
-        order = self.app.process_order("103", items, payment, promo_code="EXPIRED")
+        order = self.app.process_order(103, items, payment, promo_code="EXPIRED")
         
         # Order should be created but without discount
         self.assertIsNotNone(order)
@@ -171,13 +171,13 @@ class TestOrderProcessingIntegration(unittest.TestCase):
         # Create and process order
         items = [OrderItem(2, 1, 29.99)]
         payment = {"valid": True, "type": "credit_card", "card_number": "1234567890123456", "amount": 35}
-        order = self.app.process_order("101", items, payment)
+        order = self.app.process_order(101, items, payment)
         
         self.assertIsNotNone(order)
         initial_status = order.status
         
         # Update order status
-        updated_order = self.app.update_order_status(str(order.order_id), 'shipped')
+        updated_order = self.app.update_order_status(order.order_id, 'shipped')
         
         # Verify method returns order (implementation doesn't change status due to immutability)
         self.assertIsNotNone(updated_order)
@@ -186,20 +186,20 @@ class TestOrderProcessingIntegration(unittest.TestCase):
 
     def test_inventory_deduction_after_order(self):
         """Test that inventory is properly deducted after order."""
-        # Check initial stock
-        initial_product = self.app.product_service.get_product("2")  # Mouse
+        # Get initial product stock
+        initial_product = self.app.product_service.get_product(2)  # Mouse
         initial_stock = initial_product.quantity_available
         
         # Create order
         items = [OrderItem(2, 3, 29.99)]  # Order 3 mice
         payment = {"valid": True, "type": "credit_card", "card_number": "1234567890123456", "amount": 100}
-        order = self.app.process_order("101", items, payment)
+        order = self.app.process_order(101, items, payment)
         
         # Verify order was created
         self.assertIsNotNone(order)
         
         # Check stock after order
-        updated_product = self.app.product_service.get_product("2")
+        updated_product = self.app.product_service.get_product(2)
         final_stock = updated_product.quantity_available
         
         # Verify stock was deducted
@@ -212,8 +212,8 @@ class TestOrderProcessingIntegration(unittest.TestCase):
         
         # Should include laptop (10 units) but not mouse (50 units) or keyboard (30 units)
         product_ids = [p.product_id for p in low_stock_products]
-        self.assertIn("1", product_ids)  # Laptop with 10 units
-        self.assertNotIn("2", product_ids)  # Mouse with 50 units
+        self.assertIn(1, product_ids)  # Laptop with 10 units
+        self.assertNotIn(2, product_ids)  # Mouse with 50 units
 
     def test_sales_report_generation(self):
         """Test sales report generation after orders."""
@@ -222,8 +222,8 @@ class TestOrderProcessingIntegration(unittest.TestCase):
         items2 = [OrderItem(2, 2, 29.99)]
         payment = {"valid": True, "type": "credit_card", "card_number": "1234567890123456", "amount": 1100}
         
-        order1 = self.app.process_order("101", items1, payment)
-        order2 = self.app.process_order("102", items2, payment)
+        order1 = self.app.process_order(101, items1, payment)
+        order2 = self.app.process_order(102, items2, payment)
         
         # Verify orders were created
         self.assertIsNotNone(order1)
