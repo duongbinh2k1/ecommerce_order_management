@@ -69,7 +69,8 @@ class OrderProcessor:
             payment_service=self._payment_service,
             shipping_service=self._shipping_service,
             notification_service=self._notification_service,
-            inventory_service=self._inventory_service
+            inventory_service=self._inventory_service,
+            promotion_service=self._promotion_service
         )
 
         self._reporting_service = ReportingService(
@@ -85,8 +86,8 @@ class OrderProcessor:
 
     # Public API methods for application operations
 
-    def add_product(self, product_id: str, name: str, price: float, quantity: int,
-                    category: str, weight: float, supplier_id: str):
+    def add_product(self, product_id: int, name: str, price: float, quantity: int,
+                    category: str, weight: float, supplier_id: int):
         """Add a product to the catalog."""
         product = self._product_service.add_product(
             product_id, name, price, quantity, category, weight, supplier_id
@@ -95,14 +96,14 @@ class OrderProcessor:
             product_id, quantity, "initial_stock")
         return product
 
-    def add_customer(self, customer_id: str, name: str, email: str, tier: str,
+    def add_customer(self, customer_id: int, name: str, email: str, tier: str,
                      phone: str, address: str):
         """Add a customer to the system."""
         return self._customer_service.add_customer(
             customer_id, name, email, tier, phone, address
         )
 
-    def add_supplier(self, supplier_id: str, name: str, email: str, reliability: float):
+    def add_supplier(self, supplier_id: int, name: str, email: str, reliability: float):
         """Add a supplier to the system."""
         return self._supplier_service.add_supplier(
             supplier_id, name, email, reliability
@@ -115,7 +116,7 @@ class OrderProcessor:
             promo_id, code, discount, min_purchase, valid_until, category
         )
 
-    def process_order(self, customer_id: str, order_items, payment_info: dict,
+    def process_order(self, customer_id: int, order_items, payment_info: dict,
                       promo_code: Optional[str] = None, shipping_method: str = 'standard'):
         """Process an order through the system."""
         # Convert order_items to expected format
@@ -124,17 +125,30 @@ class OrderProcessor:
             order_items_tuples.append(
                 (item.product_id, item.quantity, item.unit_price))
 
-        return self._order_service.create_order(
+        order = self._order_service.create_order(
             customer_id=customer_id,
             order_items=order_items_tuples,
             payment_info=payment_info,
             promo_code=promo_code,
             shipping_method=shipping_method
         )
+        
+        if order:
+            # Check low stock and notify suppliers
+            for product_id, _, _ in order_items_tuples:
+                product = self._product_service.get_product(product_id)
+                if product and product.quantity_available < 5:
+                    self._supplier_service.notify_reorder(
+                        product_name=product.name,
+                        supplier_id=product.supplier_id,
+                        current_stock=product.quantity_available
+                    )
+        
+        return order
 
-    def update_order_status(self, order_id: str, new_status: str):
+    def update_order_status(self, order_id: int, new_status: str):
         """Update order status."""
-        return self._order_service.update_order_status(order_id, new_status)
+        return self._order_service.update_order_status(str(order_id), new_status)
 
     def get_low_stock_products(self, threshold: int):
         """Get products with low stock."""
@@ -144,11 +158,11 @@ class OrderProcessor:
         """Generate sales report."""
         return self._reporting_service.generate_sales_report(start_date, end_date)
 
-    def get_customer_lifetime_value(self, customer_id: str) -> float:
+    def get_customer_lifetime_value(self, customer_id: int) -> float:
         """Get customer lifetime value."""
         return self._reporting_service.get_customer_lifetime_value(customer_id)
 
-    def get_customer(self, customer_id: str):
+    def get_customer(self, customer_id: int):
         """Get customer by ID."""
         return self._customer_service.get_customer(customer_id)
 
