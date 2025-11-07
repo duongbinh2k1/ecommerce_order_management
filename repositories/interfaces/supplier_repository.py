@@ -7,27 +7,27 @@ from domain.models.supplier import Supplier
 
 class SupplierRepository(Protocol):
     """Interface for supplier data access"""
-    
+
     def add(self, supplier: Supplier) -> None:
         """Add a new supplier"""
         ...
-    
-    def get(self, supplier_id: str) -> Optional[Supplier]:
+
+    def get(self, supplier_id: int) -> Optional[Supplier]:
         """Retrieve a supplier by ID"""
         ...
-    
+
     def update(self, supplier: Supplier) -> None:
         """Update an existing supplier"""
         ...
-    
-    def delete(self, supplier_id: str) -> None:
+
+    def delete(self, supplier_id: int) -> None:
         """Remove a supplier"""
         ...
-    
-    def get_all(self) -> dict[str, Supplier]:
+
+    def get_all(self) -> dict[int, Supplier]:
         """Get all suppliers"""
         ...
-    
+
     def exists(self, supplier_id: str) -> bool:
         """Check if a supplier exists"""
         ...

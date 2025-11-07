@@ -11,27 +11,27 @@ class ProductRepository(Protocol):
     Interface for product data access.
     Services depend on this abstraction, not concrete implementations.
     """
-    
+
     def add(self, product: Product) -> None:
         """Add a new product to the repository"""
         ...
-    
-    def get(self, product_id: str) -> Optional[Product]:
+
+    def get(self, product_id: int) -> Optional[Product]:
         """Retrieve a product by ID"""
         ...
-    
+
     def update(self, product: Product) -> None:
         """Update an existing product"""
         ...
-    
-    def delete(self, product_id: str) -> None:
+
+    def delete(self, product_id: int) -> None:
         """Remove a product from the repository"""
         ...
-    
-    def get_all(self) -> dict[str, Product]:
+
+    def get_all(self) -> dict[int, Product]:
         """Get all products"""
         ...
-    
-    def exists(self, product_id: str) -> bool:
+
+    def exists(self, product_id: int) -> bool:
         """Check if a product exists"""
         ...
