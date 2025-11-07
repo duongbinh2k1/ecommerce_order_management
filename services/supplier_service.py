@@ -19,7 +19,7 @@ class SupplierService:
 
     def add_supplier(
         self,
-        supplier_id: str,
+        supplier_id: int,
         name: str,
         email: str,
         reliability: float
@@ -45,7 +45,7 @@ class SupplierService:
         self.__repository.add(supplier)
         return supplier
 
-    def get_supplier(self, supplier_id: str) -> Optional[Supplier]:
+    def get_supplier(self, supplier_id: int) -> Optional[Supplier]:
         """
         Retrieve a supplier by ID.
 
@@ -74,7 +74,7 @@ class SupplierService:
 
     def update_reliability(
         self,
-        supplier_id: str,
+        supplier_id: int,
         new_reliability: float
     ) -> bool:
         """
@@ -113,7 +113,7 @@ class SupplierService:
     def notify_reorder(
         self,
         product_name: str,
-        supplier_id: str,
+        supplier_id: int,
         current_stock: int
     ) -> bool:
         """

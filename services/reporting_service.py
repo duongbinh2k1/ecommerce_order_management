@@ -24,7 +24,7 @@ class ReportingService:
         self.__order_service = order_service
         self.__product_service = product_service
 
-    def get_customer_lifetime_value(self, customer_id: str) -> float:
+    def get_customer_lifetime_value(self, customer_id: int) -> float:
         """
         Calculate customer lifetime value.
 
@@ -94,7 +94,7 @@ class ReportingService:
                             # Revenue by category
                             if product.category not in report['revenue_by_category']:
                                 report['revenue_by_category'][product.category] = 0.0
-                            
+
                             # Extract Money value
                             item_price = item.unit_price.value
                             report['revenue_by_category'][product.category] += (
@@ -122,7 +122,8 @@ class ReportingService:
         customers = self.__customer_service.get_all_customers()
 
         for customer_id in customers.keys():
-            customer_spending[customer_id] = self.get_customer_lifetime_value(customer_id)
+            customer_spending[customer_id] = self.get_customer_lifetime_value(
+                customer_id)
 
         sorted_customers = sorted(
             customer_spending.items(),
@@ -169,7 +170,7 @@ class ReportingService:
                     if product:
                         if product.category not in revenue_by_category:
                             revenue_by_category[product.category] = 0.0
-                        
+
                         item_price = item.unit_price.value
                         revenue_by_category[product.category] += (
                             item.quantity * item_price

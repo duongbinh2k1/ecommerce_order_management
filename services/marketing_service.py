@@ -114,7 +114,6 @@ class MarketingService:
         Returns:
             Dictionary with customer segments
         """
-        from services.reporting_service import ReportingService
         
         # Would need ReportingService injected, for now return placeholder
         return {

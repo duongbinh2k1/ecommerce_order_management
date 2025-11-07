@@ -20,7 +20,7 @@ class InventoryService:
 
     def log_inventory_change(
         self,
-        product_id: str,
+        product_id: int,
         quantity_change: int,
         reason: str
     ) -> None:
@@ -41,9 +41,9 @@ class InventoryService:
 
     def restock_product(
         self,
-        product_id: str,
+        product_id: int,
         quantity: int,
-        supplier_id: Optional[str] = None
+        supplier_id: Optional[int] = None
     ) -> bool:
         """
         Restock a product.
@@ -68,10 +68,12 @@ class InventoryService:
 
         # Update quantity through product service
         new_quantity = product.quantity_available + quantity
-        self.__product_service.update_product_quantity(product_id, new_quantity)
-        
+        self.__product_service.update_product_quantity(
+            product_id, new_quantity)
+
         self.log_inventory_change(product_id, quantity, "restock")
-        print(f"Restocked {product.name} by {quantity}. New stock: {new_quantity}")
+        print(
+            f"Restocked {product.name} by {quantity}. New stock: {new_quantity}")
         return True
 
     def get_low_stock_products(self, threshold: int = 10) -> list[Product]:
@@ -92,7 +94,7 @@ class InventoryService:
 
     def check_product_availability(
         self,
-        product_id: str,
+        product_id: int,
         required_quantity: int
     ) -> bool:
         """

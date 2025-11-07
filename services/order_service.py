@@ -52,8 +52,9 @@ class OrderService:
 
     def create_order(
         self,
-        customer_id: str,
-        order_items: list[tuple[str, int, float]],  # (product_id, quantity, unit_price)
+        customer_id: int,
+        # (product_id, quantity, unit_price)
+        order_items: list[tuple[int, int, float]],
         payment_info: dict,
         promo_code: Optional[str] = None,
         shipping_method: str = 'standard'
@@ -69,7 +70,7 @@ class OrderService:
             shipping_method: Shipping method
 
         Returns:
-            Created Order or None if failed
+            Order object if successful, None otherwise
         """
         # Step 1: Validate customer
         customer = self.__customer_service.get_customer(customer_id)
@@ -134,11 +135,12 @@ class OrderService:
         total_price = pricing_breakdown['final_price'] + shipping_cost + tax
 
         # Step 7: Validate and process payment
-        payment_method_enum = PaymentMethod(payment_info.get('type', 'credit_card'))
-        order_id = str(self.__repository.get_next_id())
+        payment_method_enum = PaymentMethod(
+            payment_info.get('type', 'credit_card'))
+        order_id = self.__repository.get_next_id()
 
         is_valid, error = self.__payment_service.process_payment(
-            order_id=order_id,
+            order_id=str(order_id),
             amount=total_price,
             payment_method=payment_method_enum,
             payment_info=payment_info
@@ -152,12 +154,14 @@ class OrderService:
         for product_id, quantity, _ in order_items:
             product = products[product_id]
             new_quantity = product.quantity_available - quantity
-            self.__product_service.update_product_quantity(product_id, new_quantity)
-            self.__inventory_service.log_inventory_change(product_id, -quantity, "sale")
+            self.__product_service.update_product_quantity(
+                product_id, new_quantity)
+            self.__inventory_service.log_inventory_change(
+                product_id, -quantity, "sale")
 
         # Step 9: Create Order object
         order = Order(
-            order_id=int(order_id),
+            order_id=order_id,
             customer_id=customer_id,
             items=order_item_objects,
             total_price=total_price,
@@ -176,7 +180,8 @@ class OrderService:
         # Step 11: Send confirmation notification
         self.__notification_service.send_order_confirmation(customer, order)
 
-        print(f"Order {order_id} created successfully! Total: ${total_price:.2f}")
+        print(
+            f"Order {order_id} created successfully! Total: ${total_price:.2f}")
         return order
 
     def __calculate_tax(self, subtotal: float, customer_address: str) -> float:
@@ -230,7 +235,8 @@ class OrderService:
             product = products.get(item.product_id)
             if product:
                 new_quantity = product.quantity_available + item.quantity
-                self.__product_service.update_product_quantity(item.product_id, new_quantity)
+                self.__product_service.update_product_quantity(
+                    item.product_id, new_quantity)
                 self.__inventory_service.log_inventory_change(
                     item.product_id,
                     item.quantity,
@@ -263,14 +269,14 @@ class OrderService:
             print("Order not found")
             return None
 
-        customer = self.__customer_service.get_customer(str(order.customer_id))
+        customer = self.__customer_service.get_customer(order.customer_id)
         if not customer:
             return None
 
         # Create shipment
         tracking_number = self.__shipping_service.create_shipment(
             order_id=order_id,
-            shipping_method=order.shipping_method,
+            shipping_method='standard',  # TODO: Add shipping_method to Order model
             address=customer.address.value
         )
 
@@ -332,7 +338,8 @@ class OrderService:
         # For now, just handle notifications
         customer = self.__customer_service.get_customer(str(order.customer_id))
         if customer:
-            print(f"To: {customer.email.value}: Order {order_id} status changed to {new_status}")
+            print(
+                f"To: {customer.email.value}: Order {order_id} status changed to {new_status}")
 
         # If shipped, create tracking
         if new_status == 'shipped':
@@ -372,8 +379,10 @@ class OrderService:
             discount_percent=discount_percent
         )
 
-        print(f"Applied {discount_percent}% discount to order {order_id}. Reason: {reason}")
-        print(f"New total: ${new_price:.2f} (was ${order.total_price.value:.2f})")
+        print(
+            f"Applied {discount_percent}% discount to order {order_id}. Reason: {reason}")
+        print(
+            f"New total: ${new_price:.2f} (was ${order.total_price.value:.2f})")
 
         # Would need to recreate order with new price (immutability)
         return order

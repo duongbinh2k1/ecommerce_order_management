@@ -84,7 +84,7 @@ class ShippingService:
             'shipment_id': shipment_id,
             'order_id': order_id,
             'tracking_number': tracking_number,
-            'shipping_method': shipping_method.value,
+            'shipping_method': shipping_method if isinstance(shipping_method, str) else shipping_method.value,
             'address': address,
             'status': 'pending'
         }

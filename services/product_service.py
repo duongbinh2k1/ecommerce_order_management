@@ -19,13 +19,13 @@ class ProductService:
 
     def add_product(
         self,
-        product_id: str,
+        product_id: int,
         name: str,
         price: float,
         quantity: int,
         category: str,
         weight: float,
-        supplier_id: str
+        supplier_id: int
     ) -> Product:
         """
         Add a new product to the catalog.
@@ -52,9 +52,10 @@ class ProductService:
             supplier_id=supplier_id
         )
         self.__repository.add(product)
+        # Note: Repository uses string keys internally, conversion handled by repository
         return product
 
-    def get_product(self, product_id: str) -> Optional[Product]:
+    def get_product(self, product_id: int) -> Optional[Product]:
         """
         Retrieve a product by ID.
 
@@ -66,7 +67,7 @@ class ProductService:
         """
         return self.__repository.get(product_id)
 
-    def update_product_price(self, product_id: str, new_price: float) -> bool:
+    def update_product_price(self, product_id: int, new_price: float) -> bool:
         """
         Update the price of a product.
 
@@ -93,7 +94,8 @@ class ProductService:
             supplier_id=product.supplier_id
         )
         self.__repository.update(updated_product)
-        print(f"Updated {product.name} price from ${old_price:.2f} to ${new_price:.2f}")
+        print(
+            f"Updated {product.name} price from ${old_price:.2f} to ${new_price:.2f}")
         return True
 
     def get_all_products(self) -> dict[str, Product]:
@@ -105,7 +107,7 @@ class ProductService:
         """
         return self.__repository.get_all()
 
-    def update_product_quantity(self, product_id: str, new_quantity: int) -> bool:
+    def update_product_quantity(self, product_id: int, new_quantity: int) -> bool:
         """
         Update the quantity of a product.
 

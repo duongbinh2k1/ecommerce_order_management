@@ -48,7 +48,8 @@ class PricingService:
             product = products.get(item.product_id)
             if product:
                 # Extract Money value for calculation
-                item_price = item.unit_price.value if isinstance(item.unit_price, Money) else item.unit_price
+                item_price = item.unit_price.value if isinstance(
+                    item.unit_price, Money) else item.unit_price
                 subtotal += item.quantity * item_price
                 total_weight += product.weight * item.quantity
 

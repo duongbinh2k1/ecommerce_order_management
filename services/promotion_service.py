@@ -63,11 +63,11 @@ class PromotionService:
             Promotion if found and valid, None otherwise
         """
         promotion = self.__repository.get(code)
-        
+
         # Check if promotion is still valid
         if promotion and datetime.datetime.now() > promotion.valid_until:
             return None
-            
+
         return promotion
 
     def increment_usage(self, code: str) -> bool:

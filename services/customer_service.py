@@ -20,7 +20,7 @@ class CustomerService:
 
     def add_customer(
         self,
-        customer_id: str,
+        customer_id: int,
         name: str,
         email: str,
         tier: str,
@@ -53,7 +53,7 @@ class CustomerService:
         self.__repository.add(customer)
         return customer
 
-    def get_customer(self, customer_id: str) -> Optional[Customer]:
+    def get_customer(self, customer_id: int) -> Optional[Customer]:
         """
         Retrieve a customer by ID.
 
@@ -65,7 +65,7 @@ class CustomerService:
         """
         return self.__repository.get(customer_id)
 
-    def add_loyalty_points(self, customer_id: str, points: int) -> bool:
+    def add_loyalty_points(self, customer_id: int, points: int) -> bool:
         """
         Add loyalty points to a customer.
 
@@ -96,7 +96,7 @@ class CustomerService:
 
     def upgrade_membership(
         self,
-        customer_id: str,
+        customer_id: int,
         new_tier: MembershipTier
     ) -> bool:
         """
@@ -127,7 +127,7 @@ class CustomerService:
         print(f"Customer {customer.name} upgraded to {new_tier}!")
         return True
 
-    def add_order_to_history(self, customer_id: str, order_id: str) -> bool:
+    def add_order_to_history(self, customer_id: int, order_id: int) -> bool:
         """
         Add an order to customer's order history.
 
@@ -157,7 +157,7 @@ class CustomerService:
 
     def auto_upgrade_membership(
         self,
-        customer_id: str,
+        customer_id: int,
         lifetime_value: float
     ) -> bool:
         """
