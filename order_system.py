@@ -59,7 +59,8 @@ order_service = OrderService(
     payment_service=payment_service,
     shipping_service=shipping_service,
     notification_service=notification_service,
-    inventory_service=inventory_service
+    inventory_service=inventory_service,
+    promotion_service=promotion_service
 )
 
 reporting_service = ReportingService(

@@ -26,21 +26,16 @@ class NotificationService:
             customer: Customer who placed the order
             order: Order details
         """
-        message = (
-            f"Order Confirmation for {customer.name}\n"
-            f"Order ID: {order.order_id}\n"
-            f"Total: ${order.total_price.value:.2f}\n"
-            f"Status: {order.status.value}"
-        )
-
-        # In a real system, this would send an email/SMS
-        print(f"[EMAIL to {customer.email.value}] {message}")
+        # Format exactly like legacy system
+        print(f"To: {customer.email.value}: Order {order.order_id} confirmed! Total: ${order.total_price.value:.2f}")
+        if hasattr(customer, 'phone') and customer.phone:
+            print(f"SMS to {customer.phone.value}: Order {order.order_id} confirmed")
 
         self.__notification_log.append({
             'customer_id': customer.customer_id,
             'order_id': order.order_id,
             'type': 'order_confirmation',
-            'message': message
+            'total': order.total_price.value
         })
 
     def send_shipment_notification(
@@ -57,18 +52,14 @@ class NotificationService:
             order_id: Order identifier
             tracking_number: Tracking number
         """
-        message = (
-            f"Your order {order_id} has been shipped!\n"
-            f"Tracking number: {tracking_number}"
-        )
-
-        print(f"[EMAIL to {customer.email.value}] {message}")
+        # Format exactly like legacy system
+        print(f"To: {customer.email.value}: Order {order_id} status changed to shipped")
 
         self.__notification_log.append({
             'customer_id': customer.customer_id,
             'order_id': order_id,
             'type': 'shipment',
-            'message': message
+            'tracking_number': tracking_number
         })
 
     def send_low_stock_alert(

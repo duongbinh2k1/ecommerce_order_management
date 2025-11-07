@@ -29,7 +29,7 @@ class PricingService:
     def calculate_subtotal(
         self,
         order_items: list['OrderItem'],
-        products: dict[str, 'Product']
+        products: dict[int, 'Product']
     ) -> tuple[float, float]:
         """
         Calculate order subtotal and total weight.
@@ -59,7 +59,7 @@ class PricingService:
         self,
         customer: 'Customer',
         order_items: list['OrderItem'],
-        products: dict[str, 'Product'],
+        products: dict[int, 'Product'],
         promotion: Optional['Promotion'] = None
     ) -> dict:
         """

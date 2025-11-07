@@ -1,5 +1,5 @@
 # Demo usage of the legacy system
-from order_system import *
+from order_system_old import *
 import datetime
 
 print("=" * 60)
@@ -49,8 +49,8 @@ payment1 = {"valid": True, "type": "credit_card", "card_number": "12345678901234
 order1 = process_order(101, items1, payment1, promo_code="SAVE15", shipping_method='express')
 if order1:
     print(f"✓ Order {order1.order_id} created successfully!")
-    print(f"  Total: ${order1.total_price.value:.2f} (includes ${order1.shipping_cost.value:.2f} shipping)")
-    print(f"  Status: {order1.status.value}")
+    print(f"  Total: ${order1.total_price:.2f} (includes ${order1.shipping_cost:.2f} shipping)")
+    print(f"  Status: {order1.status}")
 
 # Create second order
 print("\n6. Processing second order (Standard member, bulk purchase)...")
@@ -62,7 +62,7 @@ payment2 = {"valid": True, "type": "paypal", "email": "charlie@email.com", "amou
 order2 = process_order(103, items2, payment2, shipping_method='standard')
 if order2:
     print(f"✓ Order {order2.order_id} created successfully!")
-    print(f"  Total: ${order2.total_price.value:.2f}")
+    print(f"  Total: ${order2.total_price:.2f}")
 
 # Create third order
 print("\n7. Processing third order (Bronze member, furniture)...")
@@ -107,7 +107,7 @@ for cust_id in [101, 102, 103, 104]:
     customer = get_customer(cust_id)
     if customer:
         ltv = get_customer_lifetime_value(cust_id)
-        print(f"{customer.name} ({customer.membership_tier.value}): ${ltv:.2f}")
+        print(f"{customer.name} ({customer.membership_tier}): ${ltv:.2f}")
 
 print("\n" + "=" * 60)
 print("Demo completed!")

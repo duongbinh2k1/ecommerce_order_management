@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from services.shipping_service import ShippingService
     from services.notification_service import NotificationService
     from services.inventory_service import InventoryService
+    from services.promotion_service import PromotionService
 
 
 class OrderService:
@@ -32,7 +33,8 @@ class OrderService:
         payment_service: 'PaymentService',
         shipping_service: 'ShippingService',
         notification_service: 'NotificationService',
-        inventory_service: 'InventoryService'
+        inventory_service: 'InventoryService',
+        promotion_service: Optional['PromotionService'] = None
     ) -> None:
         """
         Initialize the order service with dependencies (Dependency Injection).
@@ -49,6 +51,7 @@ class OrderService:
         self.__shipping_service = shipping_service
         self.__notification_service = notification_service
         self.__inventory_service = inventory_service
+        self.__promotion_service = promotion_service
 
     def create_order(
         self,
@@ -106,8 +109,13 @@ class OrderService:
             products[product_id] = product
 
         # Step 3: Calculate pricing with all discounts
-        # TODO: Add PromotionService to get promotion by code
+        # Get promotion from promo_code using PromotionService
         promotion = None
+        if promo_code and self.__promotion_service:
+            promotion = self.__promotion_service.get_promotion(promo_code)
+            if promotion:
+                # Increment usage count
+                self.__promotion_service.increment_usage(promo_code)
 
         pricing_breakdown = self.__pricing_service.apply_all_discounts(
             customer=customer,
@@ -180,8 +188,6 @@ class OrderService:
         # Step 11: Send confirmation notification
         self.__notification_service.send_order_confirmation(customer, order)
 
-        print(
-            f"Order {order_id} created successfully! Total: ${total_price:.2f}")
         return order
 
     def __calculate_tax(self, subtotal: float, customer_address: str) -> float:
@@ -280,15 +286,10 @@ class OrderService:
             address=customer.address.value
         )
 
-        # Send notification
-        self.__notification_service.send_shipment_notification(
-            customer=customer,
-            order_id=order_id,
-            tracking_number=tracking_number
-        )
+        # Note: Legacy system sends notification in update_order_status
+        # Don't duplicate notification here
 
         # Note: Order status would need to be updated via setter or recreation
-        print(f"Order {order_id} shipped! Tracking: {tracking_number}")
         return tracking_number
 
     def get_customer_orders(self, customer_id: str) -> list[Order]:
@@ -336,16 +337,19 @@ class OrderService:
 
         # Note: Order is immutable, would need recreation with new status
         # For now, just handle notifications
-        customer = self.__customer_service.get_customer(str(order.customer_id))
-        if customer:
-            print(
-                f"To: {customer.email.value}: Order {order_id} status changed to {new_status}")
+        customer = self.__customer_service.get_customer(order.customer_id)
 
         # If shipped, create tracking
         if new_status == 'shipped':
             tracking_number = self.ship_order(order_id)
             if tracking_number:
-                print(f"Shipment created with tracking: {tracking_number}")
+                # Update order with tracking number
+                order.tracking_number = tracking_number
+                if customer:
+                    print(f"To: {customer.email.value}: Order {order_id} status changed to {new_status}")
+        else:
+            if customer:
+                print(f"To: {customer.email.value}: Order {order_id} status changed to {new_status}")
 
         return order
 

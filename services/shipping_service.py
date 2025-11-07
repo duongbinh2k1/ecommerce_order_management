@@ -78,7 +78,7 @@ class ShippingService:
         """
         import random
         shipment_id = self.__repository.get_next_id()
-        tracking_number = f"TRACK-{order_id}-{random.randint(1000, 9999)}"
+        tracking_number = f"TRACK{order_id}{random.randint(1000, 9999)}"
 
         shipment = {
             'shipment_id': shipment_id,
