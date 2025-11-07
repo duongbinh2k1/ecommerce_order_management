@@ -311,7 +311,7 @@ class OrderService:
             if self.__repository.exists(str(order_id))
         ]
 
-    def get_all_orders(self) -> dict[str, Order]:
+    def get_all_orders(self) -> dict[int, Order]:
         """Get all orders."""
         return self.__repository.get_all()
 

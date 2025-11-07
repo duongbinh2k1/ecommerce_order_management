@@ -89,7 +89,8 @@ class CustomerService:
             membership_tier=customer.membership_tier.value,  # Extract primitive
             phone=customer.phone.value if customer.phone else "",
             address=customer.address.value,  # Extract primitive
-            loyalty_points=new_loyalty_points
+            loyalty_points=new_loyalty_points,
+            order_history=customer.order_history  # Preserve order history
         )
         self.__repository.update(updated_customer)
         return True
@@ -121,7 +122,8 @@ class CustomerService:
             membership_tier=new_tier.value,
             phone=customer.phone.value if customer.phone else "",
             address=customer.address.value,
-            loyalty_points=customer.loyalty_points
+            loyalty_points=customer.loyalty_points,
+            order_history=customer.order_history  # Preserve order history
         )
         self.__repository.update(updated_customer)
         print(f"Customer {customer.name} upgraded to {new_tier}!")
@@ -144,6 +146,19 @@ class CustomerService:
 
         # Add order to history (customer has order_history list)
         customer.order_history.append(order_id)
+        
+        # Create updated customer and save back to repository
+        updated_customer = Customer(
+            customer_id=customer.customer_id,
+            name=customer.name,
+            email=customer.email.value,  # Extract primitive
+            membership_tier=customer.membership_tier.value,  # Extract primitive
+            phone=customer.phone.value if customer.phone else "",
+            address=customer.address.value,  # Extract primitive
+            loyalty_points=customer.loyalty_points,
+            order_history=customer.order_history  # Pass the updated order_history
+        )
+        self.__repository.update(updated_customer)
         return True
 
     def get_all_customers(self) -> dict[str, Customer]:

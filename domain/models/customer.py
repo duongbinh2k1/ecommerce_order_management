@@ -18,7 +18,8 @@ class Customer:
         membership_tier: str,
         phone: str,
         address: str,
-        loyalty_points: int
+        loyalty_points: int,
+        order_history: List[int] = None
     ) -> None:
         self.__validate(name, loyalty_points)
 
@@ -30,7 +31,7 @@ class Customer:
         self.__phone: PhoneNumber = PhoneNumber(phone)
         self.__address: Address = Address(address)
         self.__loyalty_points: int = loyalty_points
-        self.__order_history: List[int] = []
+        self.__order_history: List[int] = order_history if order_history is not None else []
 
     def __validate(self, name: str, loyalty_points: int) -> None:
         """Validate customer business rules"""

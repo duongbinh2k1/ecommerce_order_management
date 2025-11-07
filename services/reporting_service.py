@@ -42,7 +42,7 @@ class ReportingService:
         orders = self.__order_service.get_all_orders()
 
         for order_id in customer.order_history:
-            order = orders.get(str(order_id))
+            order = orders.get(order_id)
             if order and order.status != OrderStatus.CANCELLED:
                 total_value += order.total_price.value
 
