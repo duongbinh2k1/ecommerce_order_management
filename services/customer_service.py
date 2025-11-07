@@ -85,12 +85,12 @@ class CustomerService:
         updated_customer = Customer(
             customer_id=customer.customer_id,
             name=customer.name,
-            email=customer.email.value,  # Extract primitive
-            membership_tier=customer.membership_tier.value,  # Extract primitive
+            email=customer.email.value,
+            membership_tier=customer.membership_tier.value,
             phone=customer.phone.value if customer.phone.value is not None else "",
-            address=customer.address.value,  # Extract primitive
+            address=customer.address.value,
             loyalty_points=new_loyalty_points,
-            order_history=customer.order_history  # Preserve order history
+            order_history=customer.order_history
         )
         self.__repository.update(updated_customer)
         return True
@@ -123,7 +123,7 @@ class CustomerService:
             phone=customer.phone.value if customer.phone.value is not None else "",
             address=customer.address.value,
             loyalty_points=customer.loyalty_points,
-            order_history=customer.order_history  # Preserve order history
+            order_history=customer.order_history
         )
         self.__repository.update(updated_customer)
         print(f"Customer {customer.name} upgraded to {new_tier}!")
@@ -151,12 +151,12 @@ class CustomerService:
         updated_customer = Customer(
             customer_id=customer.customer_id,
             name=customer.name,
-            email=customer.email.value,  # Extract primitive
-            membership_tier=customer.membership_tier.value,  # Extract primitive
+            email=customer.email.value,
+            membership_tier=customer.membership_tier.value,
             phone=customer.phone.value if customer.phone.value is not None else "",
-            address=customer.address.value,  # Extract primitive
+            address=customer.address.value,
             loyalty_points=customer.loyalty_points,
-            order_history=customer.order_history  # Pass the updated order_history
+            order_history=customer.order_history
         )
         self.__repository.update(updated_customer)
         return True

@@ -173,7 +173,6 @@ class OrderProcessor:
         """Get customer by ID."""
         return self._customer_service.get_customer(customer_id)
 
-    # Properties to access services (for advanced usage)
     @property
     def product_service(self) -> ProductService:
         return self._product_service

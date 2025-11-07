@@ -12,7 +12,7 @@ class InMemorySupplierRepository:
     def __init__(self) -> None:
         """Initialize with empty storage"""
         self._storage: dict[int, Supplier] = {
-        }  # Internal storage uses int keys
+        }
 
     def add(self, supplier: Supplier) -> None:
         """Add a new supplier to the repository"""

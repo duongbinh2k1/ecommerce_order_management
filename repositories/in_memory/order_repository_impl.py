@@ -16,7 +16,7 @@ class InMemoryOrderRepository:
         """Initialize with empty storage"""
         self._storage: dict[int, Order] = {
         }  # Internal storage uses int keys
-        self.__next_id: int = 1  # Start from 1 like original
+        self.__next_id: int = 1
 
     def add(self, order: Order) -> None:
         """Add a new order to the repository"""

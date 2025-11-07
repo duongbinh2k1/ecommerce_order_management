@@ -84,9 +84,9 @@ class MarketingService:
         for order_id in customer.order_history:
             order = orders.get(order_id)
             if order and order.created_at > cutoff:
-                return False  # Has recent order
+                return False
 
-        return True  # No recent orders
+        return True
 
     def get_inactive_customers(self, days_threshold: int = 90) -> list[int]:
         """

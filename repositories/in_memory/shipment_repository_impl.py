@@ -10,7 +10,7 @@ class InMemoryShipmentRepository:
 
     def __init__(self) -> None:
         self.__shipments: dict[int, dict[str, Any]] = {}
-        self.__next_id: int = 1  # Start from 1 like original
+        self.__next_id: int = 1
 
     def add(self, shipment: dict[str, Any]) -> None:
         """Add a new shipment"""

@@ -256,7 +256,6 @@ class OrderService:
             reason=reason
         )
 
-        # Note: Order is immutable, would need to recreate or add setter
         print(f"Order {order_id} cancelled: {reason}")
         return True
 
@@ -287,10 +286,6 @@ class OrderService:
             address=customer.address.value
         )
 
-        # Note: Legacy system sends notification in update_order_status
-        # Don't duplicate notification here
-
-        # Note: Order status would need to be updated via setter or recreation
         return tracking_number
 
     def get_customer_orders(self, customer_id: int) -> list[Order]:
@@ -336,15 +331,12 @@ class OrderService:
         if not order:
             return None
 
-        # Note: Order is immutable, would need recreation with new status
-        # For now, just handle notifications
         customer = self.__customer_service.get_customer(order.customer_id)
 
         # If shipped, create tracking
         if new_status == 'shipped':
             tracking_number = self.ship_order(order_id)
             if tracking_number:
-                # Update order with tracking number
                 order.tracking_number = tracking_number
                 if customer:
                     print(f"To: {customer.email.value}: Order {order_id} status changed to {new_status}")

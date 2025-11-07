@@ -15,7 +15,7 @@ class InMemoryProductRepository:
     def __init__(self) -> None:
         """Initialize with empty storage"""
         self._storage: dict[int, Product] = {
-        }  # Internal storage uses int keys
+        }
 
     def add(self, product: Product) -> None:
         """Add a new product to the repository"""

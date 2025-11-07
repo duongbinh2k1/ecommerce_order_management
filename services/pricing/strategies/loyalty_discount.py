@@ -24,7 +24,7 @@ class LoyaltyPointsDiscountStrategy(DiscountStrategy):
         if loyalty_points < 100:
             return 0.0, 0
 
-        max_discount = subtotal * 0.1  # Max 10% discount from points
+        max_discount = subtotal * 0.1
         points_discount = loyalty_points * 0.01
         discount = min(max_discount, points_discount)
         points_used = int(discount * 100)
