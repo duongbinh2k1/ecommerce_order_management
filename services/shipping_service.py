@@ -1,8 +1,9 @@
 """Shipping Service - Handles shipping calculations and logistics."""
 
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from domain.enums.shipping_method import ShippingMethod
 from domain.enums.membership_tier import MembershipTier
+from domain.enums.shipment_status import ShipmentStatus
 from repositories.interfaces.shipment_repository import ShipmentRepository
 
 if TYPE_CHECKING:
@@ -84,9 +85,9 @@ class ShippingService:
             'shipment_id': shipment_id,
             'order_id': order_id,
             'tracking_number': tracking_number,
-            'shipping_method': shipping_method.value if hasattr(shipping_method, 'value') else str(shipping_method),
+            'shipping_method': shipping_method,
             'address': address,
-            'status': 'pending'
+            'status': ShipmentStatus.PENDING
         }
         self.__repository.add(shipment)
 

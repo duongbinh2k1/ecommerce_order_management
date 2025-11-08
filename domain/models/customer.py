@@ -15,7 +15,7 @@ class Customer:
         customer_id: int,
         name: str,
         email: str,
-        membership_tier: str,
+        membership_tier: MembershipTier,
         phone: str,
         address: str,
         loyalty_points: int,
@@ -26,8 +26,7 @@ class Customer:
         self.__customer_id: int = customer_id
         self.__name: str = name
         self.__email: Email = Email(email)
-        self.__membership_tier: MembershipTier = MembershipTier(
-            membership_tier)
+        self.__membership_tier: MembershipTier = membership_tier
         self.__phone: PhoneNumber = PhoneNumber(phone)
         self.__address: Address = Address(address)
         self.__loyalty_points: int = loyalty_points

@@ -2,10 +2,10 @@
 Order status enum - extracted from hardcoded strings in order_system.py
 Used in: Order.status, update_order_status(), cancel_order()
 """
-from enum import Enum
+from enum import StrEnum
 
 
-class OrderStatus(Enum):
+class OrderStatus(StrEnum):
     PENDING = 'pending'
     SHIPPED = 'shipped'
     DELIVERED = 'delivered'

@@ -2,6 +2,7 @@
 
 from typing import Any, TYPE_CHECKING
 import datetime
+from domain.enums.membership_tier import MembershipTier
 
 if TYPE_CHECKING:
     from services.customer_service import CustomerService
@@ -43,12 +44,12 @@ class MarketingService:
 
             if customer_segment == 'all':
                 send = True
-            elif customer_segment == 'gold':
-                send = customer.membership_tier.value == 'gold'
-            elif customer_segment == 'silver':
-                send = customer.membership_tier.value == 'silver'
-            elif customer_segment == 'bronze':
-                send = customer.membership_tier.value == 'bronze'
+            elif customer_segment == MembershipTier.GOLD:
+                send = customer.membership_tier == MembershipTier.GOLD
+            elif customer_segment == MembershipTier.SILVER:
+                send = customer.membership_tier == MembershipTier.SILVER
+            elif customer_segment == MembershipTier.BRONZE:
+                send = customer.membership_tier == MembershipTier.BRONZE
             elif customer_segment == 'inactive':
                 # Check if customer has ordered in last 90 days
                 send = self.__is_customer_inactive(customer.customer_id)

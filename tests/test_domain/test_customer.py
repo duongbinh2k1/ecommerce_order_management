@@ -16,7 +16,7 @@ class TestCustomer(unittest.TestCase):
             customer_id=123,
             name="John Doe",
             email="john@example.com",
-            membership_tier="gold",
+            membership_tier=MembershipTier.GOLD,
             phone="555-0123",
             address="123 Main St",
             loyalty_points=100
@@ -37,7 +37,7 @@ class TestCustomer(unittest.TestCase):
                 customer_id=123,
                 name="John Doe",
                 email="invalid-email",  # Invalid email format
-                membership_tier="gold",
+                membership_tier=MembershipTier.GOLD,
                 phone="555-0123",
                 address="123 Main St",
                 loyalty_points=100
@@ -50,7 +50,7 @@ class TestCustomer(unittest.TestCase):
                 customer_id=123,
                 name="",  # Invalid empty name
                 email="john@example.com",
-                membership_tier="gold",
+                membership_tier=MembershipTier.GOLD,
                 phone="555-0123",
                 address="123 Main St",
                 loyalty_points=100
@@ -63,7 +63,7 @@ class TestCustomer(unittest.TestCase):
                 customer_id=123,
                 name="John Doe",
                 email="john@example.com",
-                membership_tier="gold",
+                membership_tier=MembershipTier.GOLD,
                 phone="555-0123",
                 address="123 Main St",
                 loyalty_points=-10  # Invalid negative loyalty points
@@ -72,11 +72,13 @@ class TestCustomer(unittest.TestCase):
     def test_customer_validation_invalid_membership_tier(self) -> None:
         """Test Customer validation - should reject invalid membership tier."""
         with self.assertRaises(ValueError):
+            # This should fail when creating enum from invalid string
+            invalid_tier = MembershipTier("invalid_tier")
             Customer(
                 customer_id=123,
                 name="John Doe",
                 email="john@example.com",
-                membership_tier="invalid_tier",  # Invalid tier
+                membership_tier=invalid_tier,
                 phone="555-0123",
                 address="123 Main St",
                 loyalty_points=100
@@ -89,7 +91,7 @@ class TestCustomer(unittest.TestCase):
             customer_id=1,
             name="Gold Member",
             email="gold@example.com",
-            membership_tier="gold",
+            membership_tier=MembershipTier.GOLD,
             phone="555-0001",
             address="Gold St",
             loyalty_points=1000
@@ -101,7 +103,7 @@ class TestCustomer(unittest.TestCase):
             customer_id=2,
             name="Silver Member",
             email="silver@example.com",
-            membership_tier="silver",
+            membership_tier=MembershipTier.SILVER,
             phone="555-0002",
             address="Silver St",
             loyalty_points=500
@@ -113,7 +115,7 @@ class TestCustomer(unittest.TestCase):
             customer_id=3,
             name="Standard Member",
             email="standard@example.com",
-            membership_tier="standard",
+            membership_tier=MembershipTier.STANDARD,
             phone="555-0003",
             address="Standard St",
             loyalty_points=100
@@ -126,7 +128,7 @@ class TestCustomer(unittest.TestCase):
             customer_id=123,
             name="John Doe",
             email="john@example.com",
-            membership_tier="gold",
+            membership_tier=MembershipTier.GOLD,
             phone="555-0123",
             address="123 Main St",
             loyalty_points=100

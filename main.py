@@ -54,7 +54,7 @@ order1 = order_processor.process_order(101, items1, payment1, promo_code="SAVE15
 if order1:
     print(f"✓ Order {order1.order_id} created successfully!")
     print(f"  Total: ${order1.total_price.value:.2f} (includes ${order1.shipping_cost.value:.2f} shipping)")
-    print(f"  Status: {order1.status.value}")
+    print(f"  Status: {order1.status}")
 
 # Create second order
 print("\n6. Processing second order (Standard member, bulk purchase)...")
@@ -114,7 +114,7 @@ for cust_id in [101, 102, 103, 104]:
     customer = order_processor.get_customer(cust_id)
     if customer:
         ltv = order_processor.get_customer_lifetime_value(cust_id)
-        print(f"{customer.name} ({customer.membership_tier.value}): ${ltv:.2f}")
+        print(f"{customer.name} ({customer.membership_tier}): ${ltv:.2f}")
 
 print("\n" + "=" * 60)
 print("Demo completed!")

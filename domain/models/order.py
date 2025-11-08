@@ -20,12 +20,11 @@ class Order:
         order_id: int,
         customer_id: int,
         items: List['OrderItem'],
-        status: str,
+        status: OrderStatus,
         created_at: datetime.datetime,
         total_price: Union[int, float],
         shipping_cost: Union[int, float]
     ) -> None:
-        status_enum = OrderStatus(status)
         total_price_obj = Money(total_price)
         shipping_cost_obj = Money(shipping_cost)
 
@@ -34,7 +33,7 @@ class Order:
         self.__order_id: int = order_id
         self.__customer_id: int = customer_id
         self.__items: List['OrderItem'] = items
-        self.__status: OrderStatus = status_enum
+        self.__status: OrderStatus = status
         self.__created_at: datetime.datetime = created_at
         self.__total_price: Money = total_price_obj
         self.__shipping_cost: Money = shipping_cost_obj
@@ -107,8 +106,5 @@ class Order:
         return self.__payment_method
 
     @payment_method.setter
-    def payment_method(self, value: Optional[str]) -> None:
-        if value is not None:
-            self.__payment_method = PaymentMethod(value)
-        else:
-            self.__payment_method = None
+    def payment_method(self, value: Optional[PaymentMethod]) -> None:
+        self.__payment_method = value

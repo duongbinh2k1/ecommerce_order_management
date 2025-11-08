@@ -60,7 +60,7 @@ class OrderService:
         order_items: list[tuple[int, int, float]],
         payment_info: dict[str, Any],
         promo_code: Optional[str] = None,
-        shipping_method: str = 'standard'
+        shipping_method: ShippingMethod = ShippingMethod.STANDARD
     ) -> Optional[Order]:
         """
         Create a new order (this is the giant process_order refactored).
@@ -125,9 +125,8 @@ class OrderService:
         )
 
         # Step 4: Calculate shipping cost
-        shipping_method_enum = ShippingMethod(shipping_method)
         shipping_cost = self.__shipping_service.calculate_shipping_cost(
-            shipping_method=shipping_method_enum,
+            shipping_method=shipping_method,
             total_weight=pricing_breakdown['total_weight'],
             subtotal=pricing_breakdown['final_price'],
             customer_tier=customer.membership_tier
@@ -144,7 +143,7 @@ class OrderService:
 
         # Step 7: Validate and process payment
         payment_method_enum = PaymentMethod(
-            payment_info.get('type', 'credit_card'))
+            payment_info.get('type', PaymentMethod.CREDIT_CARD))
         order_id = self.__repository.get_next_id()
 
         is_valid, error = self.__payment_service.process_payment(
@@ -173,7 +172,7 @@ class OrderService:
             customer_id=customer_id,
             items=order_item_objects,
             total_price=total_price,
-            status='pending',
+            status=OrderStatus.PENDING,
             created_at=datetime.datetime.now(),
             shipping_cost=shipping_cost
         )
@@ -279,7 +278,6 @@ class OrderService:
             return None
 
         # Create shipment
-        from domain.enums.shipping_method import ShippingMethod
         tracking_number = self.__shipping_service.create_shipment(
             order_id=order_id,
             shipping_method=ShippingMethod.STANDARD,  # TODO: Add shipping_method to Order model
@@ -315,7 +313,7 @@ class OrderService:
     def update_order_status(
         self,
         order_id: int,
-        new_status: str
+        new_status: OrderStatus
     ) -> Optional[Order]:
         """
         Update order status and send notifications.
@@ -334,7 +332,7 @@ class OrderService:
         customer = self.__customer_service.get_customer(order.customer_id)
 
         # If shipped, create tracking
-        if new_status == 'shipped':
+        if new_status == OrderStatus.SHIPPED:
             tracking_number = self.ship_order(order_id)
             if tracking_number:
                 order.tracking_number = tracking_number

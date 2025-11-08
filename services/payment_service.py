@@ -1,7 +1,8 @@
 """Payment Service - Handles payment validation and processing."""
 
-from typing import Any, Optional
+from typing import Optional, Any
 from domain.enums.payment_method import PaymentMethod
+from domain.enums.payment_status import PaymentStatus
 
 
 class PaymentService:
@@ -69,8 +70,8 @@ class PaymentService:
         self.__payment_history.append({
             'order_id': order_id,
             'amount': amount,
-            'payment_method': payment_method.value,
-            'status': 'completed'
+            'payment_method': payment_method,
+            'status': PaymentStatus.COMPLETED
         })
 
         return True, None

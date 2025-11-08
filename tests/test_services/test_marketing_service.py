@@ -7,6 +7,7 @@ from typing import Optional
 from unittest.mock import Mock
 from datetime import datetime, timedelta
 from services.marketing_service import MarketingService
+from domain.enums.membership_tier import MembershipTier
 
 
 class TestMarketingService(unittest.TestCase):
@@ -26,24 +27,21 @@ class TestMarketingService(unittest.TestCase):
         self.gold_customer.customer_id = 1  # Use int for customer_id
         self.gold_customer.email = Mock()
         self.gold_customer.email.value = "gold@example.com"
-        self.gold_customer.membership_tier = Mock()
-        self.gold_customer.membership_tier.value = "gold"
+        self.gold_customer.membership_tier = MembershipTier.GOLD
         self.gold_customer.order_history = [1]  # Use int for order_id
 
         self.silver_customer = Mock()
         self.silver_customer.customer_id = 2  # Use int for customer_id
         self.silver_customer.email = Mock()
         self.silver_customer.email.value = "silver@example.com"
-        self.silver_customer.membership_tier = Mock()
-        self.silver_customer.membership_tier.value = "silver"
+        self.silver_customer.membership_tier = MembershipTier.SILVER
         self.silver_customer.order_history = [2]  # Use int for order_id
 
         self.bronze_customer = Mock()
         self.bronze_customer.customer_id = 3  # Use int for customer_id
         self.bronze_customer.email = Mock()
         self.bronze_customer.email.value = "bronze@example.com"
-        self.bronze_customer.membership_tier = Mock()
-        self.bronze_customer.membership_tier.value = "bronze"
+        self.bronze_customer.membership_tier = MembershipTier.BRONZE
         self.bronze_customer.order_history = []  # Empty list - no orders
 
     def test_send_marketing_email_to_all(self) -> None:
@@ -62,6 +60,7 @@ class TestMarketingService(unittest.TestCase):
 
     def test_send_marketing_email_to_gold(self) -> None:
         """Test sending marketing email to gold customers only."""
+        from domain.enums.membership_tier import MembershipTier
         self.customer_service.get_all_customers.return_value = {
             1: self.gold_customer,
             2: self.silver_customer,
@@ -69,13 +68,14 @@ class TestMarketingService(unittest.TestCase):
         }
 
         count = self.marketing_service.send_marketing_email(
-            "gold", "Exclusive gold member offer!"
+            MembershipTier.GOLD, "Exclusive gold member offer!"
         )
 
         self.assertEqual(count, 1)
 
     def test_send_marketing_email_to_silver(self) -> None:
         """Test sending marketing email to silver customers only."""
+        from domain.enums.membership_tier import MembershipTier
         self.customer_service.get_all_customers.return_value = {
             1: self.gold_customer,
             2: self.silver_customer,
@@ -83,13 +83,14 @@ class TestMarketingService(unittest.TestCase):
         }
 
         count = self.marketing_service.send_marketing_email(
-            "silver", "Silver member special!"
+            MembershipTier.SILVER, "Silver member special!"
         )
 
         self.assertEqual(count, 1)
 
     def test_send_marketing_email_to_bronze(self) -> None:
         """Test sending marketing email to bronze customers only."""
+        from domain.enums.membership_tier import MembershipTier
         self.customer_service.get_all_customers.return_value = {
             1: self.gold_customer,
             2: self.silver_customer,
@@ -97,7 +98,7 @@ class TestMarketingService(unittest.TestCase):
         }
 
         count = self.marketing_service.send_marketing_email(
-            "bronze", "Bronze member discount!"
+            MembershipTier.BRONZE, "Bronze member discount!"
         )
 
         self.assertEqual(count, 1)

@@ -11,6 +11,9 @@ from domain.models.customer import Customer
 from domain.models.order import Order
 from domain.models.supplier import Supplier
 from domain.models.promotion import Promotion
+from domain.enums.shipping_method import ShippingMethod
+from domain.enums.membership_tier import MembershipTier
+from domain.enums.order_status import OrderStatus
 
 # Import all repositories
 from repositories import (
@@ -106,8 +109,10 @@ class OrderProcessor:
     def add_customer(self, customer_id: int, name: str, email: str, tier: str,
                      phone: str, address: str) -> Customer:
         """Add a customer to the system."""
+        # Convert string to enum at the boundary
+        tier_enum = MembershipTier(tier)
         return self._customer_service.add_customer(
-            customer_id, name, email, tier, phone, address
+            customer_id, name, email, tier_enum, phone, address
         )
 
     def add_supplier(self, supplier_id: int, name: str, email: str, reliability: float) -> Supplier:
@@ -126,6 +131,9 @@ class OrderProcessor:
     def process_order(self, customer_id: int, order_items: list[Any], payment_info: dict[str, Any],
                       promo_code: Optional[str] = None, shipping_method: str = 'standard') -> Optional[Order]:
         """Process an order through the system."""
+        # Convert string to enum at the boundary
+        shipping_method_enum = ShippingMethod(shipping_method)
+        
         # Convert order_items to expected format
         order_items_tuples = []
         for item in order_items:
@@ -137,7 +145,7 @@ class OrderProcessor:
             order_items=order_items_tuples,
             payment_info=payment_info,
             promo_code=promo_code,
-            shipping_method=shipping_method
+            shipping_method=shipping_method_enum
         )
         
         if order:
@@ -155,7 +163,9 @@ class OrderProcessor:
 
     def update_order_status(self, order_id: int, new_status: str) -> Optional[Order]:
         """Update order status."""
-        return self._order_service.update_order_status(order_id, new_status)
+        # Convert string to enum at the boundary
+        status_enum = OrderStatus(new_status)
+        return self._order_service.update_order_status(order_id, status_enum)
 
     def get_low_stock_products(self, threshold: int) -> list[Product]:
         """Get products with low stock."""
