@@ -25,13 +25,31 @@ class TestMoney(unittest.TestCase):
 
     def test_money_creation_edge_cases(self) -> None:
         """Test Money creation with edge cases."""
-        # Test with negative amount (currently allowed in implementation)
-        money_negative = Money(-1)
-        self.assertEqual(money_negative.value, -1.0)
+        # Test with negative amount (should raise ValueError)
+        with self.assertRaises(ValueError):
+            Money(-1)
         
         # Test with very small amount
         money_small = Money(0.01)
         self.assertEqual(money_small.value, 0.01)
+
+    def test_money_creation_invalid(self) -> None:
+        """Test Money creation with invalid values."""
+        # Test with negative amount
+        with self.assertRaises(ValueError):
+            Money(-50.0)
+            
+        # Test with NaN
+        with self.assertRaises(ValueError):
+            Money(float('nan'))
+            
+        # Test with infinity
+        with self.assertRaises(ValueError):
+            Money(float('inf'))
+            
+        # Test with string (type error should be caught by validation)
+        with self.assertRaises(ValueError):
+            Money("not_a_number")  # type: ignore
 
     def test_money_arithmetic_operations(self) -> None:
         """Test Money arithmetic operations."""

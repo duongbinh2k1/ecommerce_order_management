@@ -1,6 +1,7 @@
 """
 Shipment domain model - tracks package delivery
 """
+from typing import Any
 from domain.enums.shipment_status import ShipmentStatus
 from domain.enums.shipping_method import ShippingMethod
 from domain.value_objects.address import Address
@@ -68,7 +69,7 @@ class Shipment:
     def __repr__(self) -> str:
         return f"Shipment(id={self.__shipment_id}, tracking='{self.__tracking_number}', status={self.__status.value})"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Shipment):
             return False
         return self.__shipment_id == other.shipment_id

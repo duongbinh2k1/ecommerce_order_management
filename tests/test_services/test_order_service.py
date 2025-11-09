@@ -5,6 +5,7 @@ Tests order processing, validation, and status management
 import datetime
 import unittest
 from unittest.mock import Mock, patch
+from domain.enums.shipping_method import ShippingMethod
 from services.order_service import OrderService
 from domain.enums.order_status import OrderStatus
 from domain.enums.membership_tier import MembershipTier
@@ -85,7 +86,7 @@ class TestOrderService(unittest.TestCase):
             items,
             payment_info,
             "PROMO20",
-            "standard"
+            ShippingMethod.STANDARD
         )
         
         self.assertIsNotNone(result)
@@ -146,6 +147,17 @@ class TestOrderService(unittest.TestCase):
         self.product_service.get_product.return_value = self.product
         # This should return False to simulate insufficient stock
         self.inventory_service.check_product_availability.return_value = False
+        # Mock pricing service in case it gets called before stock check fails
+        self.pricing_service.apply_all_discounts.return_value = {
+            'final_price': 2000.0,
+            'total_weight': 20.0
+        }
+        # Mock shipping service
+        self.shipping_service.calculate_shipping_cost.return_value = 25.0
+        # Mock payment service
+        self.payment_service.process_payment.return_value = (False, "Insufficient stock")
+        # Mock order repository
+        self.order_repository.get_next_id.return_value = 1001
         
         items = [(1, 20, 100.0)]  # More than available
         payment_info = {"valid": True, "type": "credit_card"}
@@ -202,7 +214,7 @@ class TestOrderService(unittest.TestCase):
         self.order_repository.get.return_value = mock_order
         self.customer_service.get_customer.return_value = self.customer
         
-        result = self.order_service.update_order_status(1, "shipped")
+        result = self.order_service.update_order_status(1, OrderStatus.SHIPPED)
         
         # Method returns order, not boolean, and may call customer service multiple times
         self.assertEqual(result, mock_order)
@@ -215,7 +227,7 @@ class TestOrderService(unittest.TestCase):
         """Test order status update for non-existent order."""
         self.order_repository.get.return_value = None
         
-        result = self.order_service.update_order_status(999, "shipped")
+        result = self.order_service.update_order_status(999, OrderStatus.SHIPPED)
         
         self.assertIsNone(result)
 

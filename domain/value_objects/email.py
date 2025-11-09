@@ -6,13 +6,26 @@ Used in: Customer, Supplier
 
 class Email:
     def __init__(self, email: str) -> None:
-        self.__email = email
-        self.__validate()
+        self.__validate(email)
+        self.__email = email.strip()
 
-    def __validate(self) -> None:
+    def __validate(self, email: str) -> None:
         """Validate email format"""
-        if not self.__email or '@' not in self.__email:
-            raise ValueError(f"Invalid email: {self.__email}")
+        if not email or not email.strip():
+            raise ValueError(f"Invalid email: {email}")
+        
+        email = email.strip()
+        if '@' not in email:
+            raise ValueError(f"Invalid email: {email}")
+        
+        # Split by @ to check local and domain parts
+        parts = email.split('@')
+        if len(parts) != 2:
+            raise ValueError(f"Invalid email: {email}")
+        
+        local_part, domain_part = parts
+        if not local_part or not domain_part:
+            raise ValueError(f"Invalid email: {email}")
 
     @property
     def value(self) -> str:

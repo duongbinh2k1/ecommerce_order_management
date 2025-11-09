@@ -6,7 +6,17 @@ Used in: Customer, for tax rate calculation
 
 class Address:
     def __init__(self, address: str) -> None:
+        self.__validate(address)
         self.__address = address
+
+    def __validate(self, address: str) -> None:
+        """Validate address format"""
+        if not address or not address.strip():
+            raise ValueError("Address cannot be empty")
+        if len(address.strip()) < 5:
+            raise ValueError(f"Address too short (minimum 5 characters): {address}")
+        if len(address) > 200:
+            raise ValueError(f"Address too long (maximum 200 characters): {address}")
 
     @property
     def value(self) -> str:

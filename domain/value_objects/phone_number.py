@@ -7,7 +7,18 @@ from typing import Optional
 
 class PhoneNumber:
     def __init__(self, phone: Optional[str]) -> None:
+        self.__validate(phone)
         self.__phone = phone
+
+    def __validate(self, phone: Optional[str]) -> None:
+        """Validate phone number format"""
+        if phone is not None:
+            # Remove spaces and common separators for validation
+            cleaned_phone = phone.replace(' ', '').replace('-', '').replace('(', '').replace(')', '').replace('+', '')
+            if not cleaned_phone.isdigit() or len(cleaned_phone) < 5:
+                raise ValueError(f"Invalid phone number: {phone}")
+            if len(cleaned_phone) > 15:  # Max international phone number length
+                raise ValueError(f"Phone number too long: {phone}")
 
     @property
     def value(self) -> Optional[str]:

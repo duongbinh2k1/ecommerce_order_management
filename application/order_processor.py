@@ -6,6 +6,7 @@ Implements proper Dependency Injection pattern as required in Phase 5
 import datetime
 from typing import Any, Optional
 
+from domain.models.order_item import OrderItem
 from domain.models.product import Product
 from domain.models.customer import Customer
 from domain.models.order import Order
@@ -131,8 +132,8 @@ class OrderProcessor:
             promo_id, code, discount, min_purchase, valid_until, category
         )
 
-    def process_order(self, customer_id: int, order_items: list[Any], payment_info: dict[str, Any],
-                      promo_code: Optional[str] = None, shipping_method: str = 'standard') -> Optional[Order]:
+    def process_order(self, customer_id: int, order_items: list[OrderItem], payment_info: dict[str, Any],
+                      promo_code: Optional[str] = None, shipping_method: str = ShippingMethod.STANDARD) -> Optional[Order]:
         """Process an order through the system."""
         # Convert string to enum at the boundary
         shipping_method_enum = ShippingMethod(shipping_method)
@@ -141,7 +142,7 @@ class OrderProcessor:
         order_items_tuples = []
         for item in order_items:
             order_items_tuples.append(
-                (item.product_id, item.quantity, item.unit_price))
+                (item.product_id, item.quantity, item.unit_price.value))
 
         order = self._order_service.create_order(
             customer_id=customer_id,

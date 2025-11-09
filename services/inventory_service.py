@@ -114,3 +114,12 @@ class InventoryService:
         if not product:
             return False
         return bool(product.quantity_available >= required_quantity)
+
+    def get_inventory_logs(self) -> list[dict[str, str | int | float]]:
+        """
+        Get all inventory change logs.
+
+        Returns:
+            List of inventory log entries
+        """
+        return self.__inventory_logs.copy()

@@ -7,7 +7,21 @@ from typing import Union
 
 class Money:
     def __init__(self, amount: Union[int, float]) -> None:
+        self.__validate(amount)
         self.__amount = float(amount)
+
+    def __validate(self, amount: Union[int, float]) -> None:
+        """Validate monetary amount"""
+        if not isinstance(amount, (int, float)):
+            raise ValueError(f"Amount must be a number, got {type(amount)}")
+        if amount < 0:
+            raise ValueError(f"Amount cannot be negative: {amount}")
+        if isinstance(amount, float) and not isinstance(amount, bool):
+            # Check for NaN and infinity
+            if amount != amount:  # NaN check
+                raise ValueError("Amount cannot be NaN")
+            if amount == float('inf') or amount == float('-inf'):
+                raise ValueError("Amount cannot be infinite")
 
     @property
     def value(self) -> float:

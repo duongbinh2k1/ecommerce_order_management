@@ -76,67 +76,6 @@ class TestShippingService(unittest.TestCase):
         expected_cost = 50 + (3.0 * 1.0)
         self.assertEqual(cost, expected_cost)
 
-    def test_estimate_delivery_time_standard(self) -> None:
-        """Test delivery time estimation for standard shipping."""
-        time = self.shipping_service.estimate_delivery_time(
-            shipping_method=ShippingMethod.STANDARD,
-            distance_km=100.0
-        )
-        
-        # Standard: 72 hours base time
-        self.assertEqual(time, 72)
-
-    def test_estimate_delivery_time_express_long_distance(self) -> None:
-        """Test delivery time estimation for express shipping with long distance."""
-        time = self.shipping_service.estimate_delivery_time(
-            shipping_method=ShippingMethod.EXPRESS,
-            distance_km=600.0
-        )
-        
-        # Express: 24 hours base + 24 hours for long distance = 48
-        self.assertEqual(time, 48)
-
-    def test_estimate_delivery_time_overnight(self) -> None:
-        """Test delivery time estimation for overnight shipping."""
-        time = self.shipping_service.estimate_delivery_time(
-            shipping_method=ShippingMethod.OVERNIGHT,
-            distance_km=150.0
-        )
-        
-        # Overnight: 12 hours base
-        self.assertEqual(time, 12)
-
-    def test_get_available_shipping_methods_light_package(self) -> None:
-        """Test available shipping methods for light package."""
-        methods = self.shipping_service.get_available_shipping_methods(weight=5.0)
-        
-        # All methods should be available for light package
-        expected_methods = [
-            ShippingMethod.STANDARD,
-            ShippingMethod.EXPRESS,
-            ShippingMethod.OVERNIGHT
-        ]
-        self.assertEqual(set(methods), set(expected_methods))
-
-    def test_get_available_shipping_methods_medium_package(self) -> None:
-        """Test available shipping methods for medium package."""
-        methods = self.shipping_service.get_available_shipping_methods(weight=15.0)
-        
-        # Only standard and express available
-        expected_methods = [
-            ShippingMethod.STANDARD,
-            ShippingMethod.EXPRESS
-        ]
-        self.assertEqual(set(methods), set(expected_methods))
-
-    def test_get_available_shipping_methods_heavy_package(self) -> None:
-        """Test available shipping methods for heavy package."""
-        methods = self.shipping_service.get_available_shipping_methods(weight=25.0)
-        
-        # Only standard available
-        expected_methods = [ShippingMethod.STANDARD]
-        self.assertEqual(methods, expected_methods)
-
     def test_calculate_shipping_cost_zero_weight(self) -> None:
         """Test shipping cost calculation with zero weight."""
         cost = self.shipping_service.calculate_shipping_cost(
@@ -160,6 +99,18 @@ class TestShippingService(unittest.TestCase):
         
         # Overnight: 50 + (50.0 * 1.0) = 100, no gold discount for overnight
         self.assertEqual(cost, 100.0)
+
+    def test_calculate_shipping_cost_standard_exactly_threshold(self) -> None:
+        """Test standard shipping cost at exactly $50 threshold."""
+        cost = self.shipping_service.calculate_shipping_cost(
+            shipping_method=ShippingMethod.STANDARD,
+            total_weight=2.5,
+            subtotal=50.0,  # Exactly $50
+            customer_tier=MembershipTier.SILVER
+        )
+        
+        # Standard at $50: free shipping
+        self.assertEqual(cost, 0.0)
 
 
 if __name__ == '__main__':

@@ -8,6 +8,4 @@ from enum import StrEnum
 class CustomerSegment(StrEnum):
     ALL = 'all'
     GOLD = 'gold'
-    SILVER = 'silver'
-    BRONZE = 'bronze'
     INACTIVE = 'inactive'
