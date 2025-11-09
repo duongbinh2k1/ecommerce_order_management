@@ -212,7 +212,7 @@ tests/
 $ python -m coverage report
 Name                                                  Stmts   Miss  Cover
 -------------------------------------------------------------------------
-TOTAL                                                  3947    197    95%
+TOTAL                                                  4005    200    95%
 ```
 
 ### Test Statistics
@@ -244,8 +244,8 @@ cd ecommerce_order_management
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# No pip install needed - uses only standard library!
-```
+# Install lib
+pip install coverage
 
 ### Run the System
 ```bash
