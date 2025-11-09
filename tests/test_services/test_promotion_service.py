@@ -7,6 +7,7 @@ from unittest.mock import Mock
 from datetime import datetime, timedelta
 from services.promotion_service import PromotionService
 from domain.models.promotion import Promotion
+from domain.enums.product_category import ProductCategory
 
 
 class TestPromotionService(unittest.TestCase):
@@ -38,7 +39,7 @@ class TestPromotionService(unittest.TestCase):
             10.0,
             50.0,
             future_date,
-            "electronics"
+            "Electronics"  # Use capitalized version that matches enum
         )
 
         self.assertIsInstance(result, Promotion)
@@ -47,7 +48,7 @@ class TestPromotionService(unittest.TestCase):
         self.assertEqual(result.discount_percent, 10.0)
         self.assertEqual(result.min_purchase, 50.0)
         self.assertEqual(result.valid_until, future_date)
-        self.assertEqual(result.category, "electronics")
+        self.assertEqual(result.category, ProductCategory.ELECTRONICS)  # Compare with enum
         
         self.promotion_repository.add.assert_called_once_with(result)
 

@@ -5,6 +5,7 @@ Added validation logic as per README requirements
 import datetime
 from typing import Union
 from domain.value_objects.money import Money
+from domain.enums.product_category import ProductCategory
 
 
 class Promotion:
@@ -24,7 +25,7 @@ class Promotion:
         self.__discount_percent: Union[int, float] = discount_percent
         self.__min_purchase: Money = Money(min_purchase)
         self.__valid_until: datetime.datetime = valid_until
-        self.__category: str = category
+        self.__category: ProductCategory = ProductCategory(category)
         self.__used_count: int = 0
 
     def __validate(
@@ -62,7 +63,7 @@ class Promotion:
         return self.__valid_until
 
     @property
-    def category(self) -> str:
+    def category(self) -> ProductCategory:
         return self.__category
 
     @property

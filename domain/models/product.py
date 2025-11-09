@@ -4,6 +4,7 @@ Added validation logic as per README requirements
 """
 from typing import Union
 from domain.value_objects.money import Money
+from domain.enums.product_category import ProductCategory
 
 
 class Product:
@@ -23,7 +24,7 @@ class Product:
         self.__name: str = name
         self.__price: Money = Money(price)
         self.__quantity_available: int = quantity_available
-        self.__category: str = category
+        self.__category: ProductCategory = ProductCategory(category)
         self.__weight: Union[int, float] = weight
         self.__supplier_id: int = supplier_id
         self.__discount_eligible: bool = True
@@ -75,7 +76,7 @@ class Product:
         self.__quantity_available = value
 
     @property
-    def category(self) -> str:
+    def category(self) -> ProductCategory:
         return self.__category
 
     @property

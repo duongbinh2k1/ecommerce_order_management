@@ -16,6 +16,8 @@ from domain.models.promotion import Promotion
 from domain.enums.shipping_method import ShippingMethod
 from domain.enums.membership_tier import MembershipTier
 from domain.enums.order_status import OrderStatus
+from domain.enums.product_category import ProductCategory
+from domain.enums.payment_method import PaymentMethod
 
 # Import all repositories
 from repositories import (

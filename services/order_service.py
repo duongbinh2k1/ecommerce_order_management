@@ -8,6 +8,7 @@ from domain.enums.order_status import OrderStatus
 from domain.enums.payment_method import PaymentMethod
 from domain.enums.shipping_method import ShippingMethod
 from domain.enums.membership_tier import MembershipTier
+from domain.enums.us_state import USState
 from repositories.interfaces.order_repository import OrderRepository
 from domain.value_objects.money import Money
 
@@ -223,11 +224,11 @@ class OrderService:
             Tax amount
         """
         tax_rate = 0.08  # Default
-        if 'CA' in customer_address:
+        if USState.CA.value in customer_address:
             tax_rate = 0.0725
-        elif 'NY' in customer_address:
+        elif USState.NY.value in customer_address:
             tax_rate = 0.04
-        elif 'TX' in customer_address:
+        elif USState.TX.value in customer_address:
             tax_rate = 0.0625
 
         return subtotal * tax_rate

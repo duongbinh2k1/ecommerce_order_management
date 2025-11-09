@@ -3,6 +3,7 @@
 from typing import Optional, TYPE_CHECKING
 import datetime
 from services.pricing.strategies import DiscountStrategy
+from domain.enums.product_category import ProductCategory
 
 if TYPE_CHECKING:
     from domain.models.promotion import Promotion
@@ -48,7 +49,7 @@ class PromotionalDiscountStrategy(DiscountStrategy):
         for item in order_items:
             product = products.get(item.product_id)
             if product:
-                if promotion.category == 'all' or product.category == promotion.category:
+                if promotion.category == ProductCategory.ALL or product.category == promotion.category:
                     applicable = True
                     break
 

@@ -4,6 +4,7 @@ Tests the refactored Product class business logic
 """
 import unittest
 from domain.models.product import Product
+from domain.enums.product_category import ProductCategory
 
 
 class TestProduct(unittest.TestCase):
@@ -82,18 +83,42 @@ class TestProduct(unittest.TestCase):
             )
 
     def test_product_validation_category_edge_cases(self) -> None:
-        """Test Product validation - test different category inputs."""
-        # Empty category currently allowed in implementation
-        product = Product(
-            product_id=1,
-            name="Test Product",
+        """Test Product validation - test invalid category inputs."""
+        # Empty category should raise ValueError now that we use enum
+        with self.assertRaises(ValueError):
+            Product(
+                product_id=1,
+                name="Test Product",
+                price=99.99,
+                quantity_available=10,
+                category="",  # Invalid - empty string not in enum
+                weight=1.5,
+                supplier_id=1
+            )
+
+        # Invalid category should also raise ValueError
+        with self.assertRaises(ValueError):
+            Product(
+                product_id=2,
+                name="Test Product 2",
+                price=99.99,
+                quantity_available=10,
+                category="InvalidCategory",  # Invalid - not in enum
+                weight=1.5,
+                supplier_id=1
+            )
+
+        # Valid category should work fine
+        valid_product = Product(
+            product_id=3,
+            name="Valid Product",
             price=99.99,
             quantity_available=10,
-            category="",  # Currently allowed
+            category=ProductCategory.ELECTRONICS,  # Valid enum value
             weight=1.5,
             supplier_id=1
         )
-        self.assertEqual(product.category, "")
+        self.assertEqual(valid_product.category, ProductCategory.ELECTRONICS)
 
     def test_product_availability_check(self) -> None:
         """Test Product availability based on quantity."""
