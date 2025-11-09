@@ -108,9 +108,9 @@ class TestReportingService(unittest.TestCase):
         
         report = self.reporting_service.generate_sales_report(start_date, end_date)
         
-        self.assertEqual(report['total_sales'], 300.0)
-        self.assertEqual(report['total_orders'], 2)
-        self.assertEqual(report['cancelled_orders'], 0)
+        self.assertEqual(report.total_sales, 300.0)
+        self.assertEqual(report.total_orders, 2)
+        self.assertEqual(report.cancelled_orders, 0)
 
     def test_generate_sales_report_with_cancelled_orders(self) -> None:
         """Test sales report with cancelled orders."""
@@ -142,9 +142,9 @@ class TestReportingService(unittest.TestCase):
         
         report = self.reporting_service.generate_sales_report(start_date, end_date)
         
-        self.assertEqual(report['total_sales'], 300.0)  # Only non-cancelled
-        self.assertEqual(report['total_orders'], 1)
-        self.assertEqual(report['cancelled_orders'], 1)
+        self.assertEqual(report.total_sales, 300.0)  # Only non-cancelled
+        self.assertEqual(report.total_orders, 1)
+        self.assertEqual(report.cancelled_orders, 1)
 
     def test_generate_sales_report_empty_date_range(self) -> None:
         """Test sales report with no orders in date range."""
@@ -165,9 +165,9 @@ class TestReportingService(unittest.TestCase):
         
         report = self.reporting_service.generate_sales_report(start_date, end_date)
         
-        self.assertEqual(report['total_sales'], 0)
-        self.assertEqual(report['total_orders'], 0)
-        self.assertEqual(report['cancelled_orders'], 0)
+        self.assertEqual(report.total_sales, 0)
+        self.assertEqual(report.total_orders, 0)
+        self.assertEqual(report.cancelled_orders, 0)
 
 
 if __name__ == '__main__':

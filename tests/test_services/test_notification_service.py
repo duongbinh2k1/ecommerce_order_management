@@ -1,145 +1,89 @@
 """
-Test NotificationService - customer notification functionality
-Tests order confirmations, shipment notifications, and alerts
+Test NotificationService - Print-based notifications like legacy system
+Tests notification sending without logging (matching legacy behavior)
 """
 import unittest
 from unittest.mock import Mock
 from services.notification_service import NotificationService
+from domain.value_objects.email import Email
+from domain.value_objects.phone_number import PhoneNumber
+from domain.value_objects.money import Money
 
 
 class TestNotificationService(unittest.TestCase):
-    """Test NotificationService notification functionality."""
+    """Test NotificationService without logging functionality."""
 
     def setUp(self) -> None:
-        """Set up test dependencies."""
+        """Set up test fixtures."""
         self.notification_service = NotificationService()
-
-        # Create mock customer
+        
+        # Mock customer
         self.customer = Mock()
-        self.customer.customer_id = "cust_001"
-        self.customer.name = "John Doe"
-        self.customer.email = Mock()
-        self.customer.email.value = "john@example.com"
-
-        # Create mock order
+        self.customer.customer_id = 101
+        self.customer.name = "John Doe" 
+        self.customer.email = Email("john@example.com")
+        self.customer.phone = PhoneNumber("555-0123")
+        
+        # Mock order
         self.order = Mock()
         self.order.order_id = 1
-        self.order.total_price = Mock()
-        self.order.total_price.value = 150.50
-        self.order.status = Mock()
-        self.order.status.value = "confirmed"
+        self.order.total_price = Money(150.50)
 
     def test_send_order_confirmation(self) -> None:
         """Test sending order confirmation notification."""
+        # Should only print, no exceptions
         self.notification_service.send_order_confirmation(
             self.customer, self.order
         )
+        # Test passes if no exception is raised
 
-        log = self.notification_service.get_notification_log()
-        self.assertEqual(len(log), 1)
-
-        notification = log[0]
-        self.assertEqual(notification['customer_id'], "cust_001")
-        self.assertEqual(notification['order_id'], 1)
-        self.assertEqual(notification['type'], "order_confirmation")
-        self.assertEqual(notification['total'], 150.50)
+    def test_send_order_confirmation_without_phone(self) -> None:
+        """Test order confirmation when customer has no phone."""
+        customer_no_phone = Mock()
+        customer_no_phone.customer_id = 102
+        customer_no_phone.name = "Jane Doe"
+        customer_no_phone.email = Email("jane@example.com")
+        # No phone attribute
+        
+        self.notification_service.send_order_confirmation(
+            customer_no_phone, self.order
+        )
+        # Test passes if no exception is raised
 
     def test_send_shipment_notification(self) -> None:
         """Test sending shipment notification."""
         self.notification_service.send_shipment_notification(
-            self.customer, 2, "TRACK123456"
+            self.customer, 2
         )
-
-        log = self.notification_service.get_notification_log()
-        self.assertEqual(len(log), 1)
-
-        notification = log[0]
-        self.assertEqual(notification['customer_id'], "cust_001")
-        self.assertEqual(notification['order_id'], 2)
-        self.assertEqual(notification['type'], "shipment")
-        self.assertEqual(notification['tracking_number'], "TRACK123456")
+        # Test passes if no exception is raised
 
     def test_send_low_stock_alert(self) -> None:
         """Test sending low stock alert to supplier."""
         self.notification_service.send_low_stock_alert(
-            "supplier@company.com", "Widget Pro", 5
+            "supplier@company.com", "Widget Pro"
         )
-
-        log = self.notification_service.get_notification_log()
-        self.assertEqual(len(log), 1)
-
-        notification = log[0]
-        self.assertEqual(notification['supplier_email'], "supplier@company.com")
-        self.assertEqual(notification['type'], "low_stock_alert")
-        self.assertIn("Low Stock Alert!", notification['message'])
-        self.assertIn("Product: Widget Pro", notification['message'])
-        self.assertIn("Current stock: 5", notification['message'])
+        # Test passes if no exception is raised
 
     def test_send_membership_upgrade(self) -> None:
         """Test sending membership upgrade notification."""
         self.notification_service.send_membership_upgrade(
             self.customer, "Gold"
         )
+        # Test passes if no exception is raised
 
-        log = self.notification_service.get_notification_log()
-        self.assertEqual(len(log), 1)
-
-        notification = log[0]
-        self.assertEqual(notification['customer_id'], "cust_001")
-        self.assertEqual(notification['type'], "membership_upgrade")
-        self.assertIn("Congratulations John Doe!", notification['message'])
-        self.assertIn("Your membership has been upgraded to Gold!", notification['message'])
-
-    def test_multiple_notifications(self) -> None:
-        """Test sending multiple notifications and checking log."""
-        # Send order confirmation
-        self.notification_service.send_order_confirmation(
-            self.customer, self.order
+    def test_send_marketing_email(self) -> None:
+        """Test sending marketing email."""
+        self.notification_service.send_marketing_email(
+            "customer@example.com", "Special discount just for you!"
         )
+        # Test passes if no exception is raised
 
-        # Send shipment notification
-        self.notification_service.send_shipment_notification(
-            self.customer, 1, "SHIP789"
+    def test_send_order_cancellation(self) -> None:
+        """Test sending order cancellation notification."""
+        self.notification_service.send_order_cancellation(
+            self.customer, 3, "Customer request"
         )
-
-        # Send membership upgrade
-        self.notification_service.send_membership_upgrade(
-            self.customer, "Silver"
-        )
-
-        log = self.notification_service.get_notification_log()
-        self.assertEqual(len(log), 3)
-
-        # Check types are different
-        types = [notification['type'] for notification in log]
-        self.assertIn("order_confirmation", types)
-        self.assertIn("shipment", types)
-        self.assertIn("membership_upgrade", types)
-
-    def test_get_notification_log_returns_copy(self) -> None:
-        """Test that get_notification_log returns a copy."""
-        self.notification_service.send_order_confirmation(
-            self.customer, self.order
-        )
-
-        log1 = self.notification_service.get_notification_log()
-        log2 = self.notification_service.get_notification_log()
-
-        # Should be equal but not the same object
-        self.assertEqual(log1, log2)
-        self.assertIsNot(log1, log2)
-
-        # Modifying returned log shouldn't affect internal state
-        log1.append({"test": "data"})
-        log3 = self.notification_service.get_notification_log()
-        self.assertNotEqual(len(log1), len(log3))
-
-    def test_empty_notification_log(self) -> None:
-        """Test getting notification log when no notifications sent."""
-        log = self.notification_service.get_notification_log()
-        
-        self.assertEqual(len(log), 0)
-        self.assertIsInstance(log, list)
+        # Test passes if no exception is raised
 
 
 if __name__ == '__main__':

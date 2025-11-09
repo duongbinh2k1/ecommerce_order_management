@@ -5,6 +5,7 @@ Tests inventory logging, restocking, and stock availability checks
 import unittest
 from unittest.mock import Mock
 from services.inventory_service import InventoryService
+from domain.value_objects.inventory_log_entry import InventoryLogEntry
 
 
 class TestInventoryService(unittest.TestCase):
@@ -32,10 +33,11 @@ class TestInventoryService(unittest.TestCase):
         self.assertEqual(len(logs), 1)
 
         log_entry = logs[0]
-        self.assertEqual(log_entry['product_id'], 1)
-        self.assertEqual(log_entry['quantity_change'], 10)
-        self.assertEqual(log_entry['reason'], "restock")
-        self.assertIn('timestamp', log_entry)
+        self.assertIsInstance(log_entry, InventoryLogEntry)
+        self.assertEqual(log_entry.product_id, 1)
+        self.assertEqual(log_entry.quantity_change, 10)
+        self.assertEqual(log_entry.reason, "restock")
+        self.assertIsNotNone(log_entry.timestamp)
 
     def test_restock_product_success(self) -> None:
         """Test successful product restocking."""
@@ -52,7 +54,7 @@ class TestInventoryService(unittest.TestCase):
         # Check log was created
         logs = self.inventory_service.get_inventory_logs()
         self.assertEqual(len(logs), 1)
-        self.assertEqual(logs[0]['reason'], "restock")
+        self.assertEqual(logs[0].reason, "restock")
 
     def test_restock_product_not_found(self) -> None:
         """Test restocking non-existent product."""
@@ -198,7 +200,7 @@ class TestInventoryService(unittest.TestCase):
         self.assertIsNot(logs1, logs2)
 
         # Modifying returned logs shouldn't affect internal state
-        logs1.append({"test": "data"})
+        logs1.append(Mock())  # Can't append dict to list of InventoryLogEntry
         logs3 = self.inventory_service.get_inventory_logs()
         self.assertNotEqual(len(logs1), len(logs3))
 
@@ -212,10 +214,32 @@ class TestInventoryService(unittest.TestCase):
         self.assertEqual(len(logs), 3)
 
         # Check all entries are different
-        reasons = [log['reason'] for log in logs]
+        reasons = [log.reason for log in logs]
         self.assertIn("restock", reasons)
         self.assertIn("sale", reasons)
         self.assertIn("initial_stock", reasons)
+
+    def test_get_inventory_logs_as_dicts_backward_compatibility(self) -> None:
+        """Test backward compatibility method returns dictionaries."""
+        self.inventory_service.log_inventory_change(1, 10, "restock")
+        self.inventory_service.log_inventory_change(2, -5, "sale")
+
+        # Test value object method
+        logs = self.inventory_service.get_inventory_logs()
+        self.assertEqual(len(logs), 2)
+        self.assertIsInstance(logs[0], InventoryLogEntry)
+
+        # Test backward compatibility method
+        dict_logs = self.inventory_service.get_inventory_logs_as_dicts()
+        self.assertEqual(len(dict_logs), 2)
+        self.assertIsInstance(dict_logs[0], dict)
+        
+        # Check dictionary structure
+        first_log = dict_logs[0]
+        self.assertEqual(first_log['product_id'], 1)
+        self.assertEqual(first_log['quantity_change'], 10)
+        self.assertEqual(first_log['reason'], "restock")
+        self.assertIn('timestamp', first_log)
 
 
 if __name__ == '__main__':

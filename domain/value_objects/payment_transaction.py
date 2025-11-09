@@ -1,5 +1,5 @@
 """
-Payment Transaction domain model - for payment history and refund tracking
+Payment Transaction value object - immutable payment history record
 Used by: PaymentService for payment record management
 """
 import datetime
@@ -10,7 +10,7 @@ from domain.enums.payment_status import PaymentStatus
 
 
 class PaymentTransaction:
-    """Domain model representing a payment transaction."""
+    """Value object representing a payment transaction record."""
     
     def __init__(
         self,
@@ -18,29 +18,25 @@ class PaymentTransaction:
         amount: float,
         payment_method: PaymentMethod,
         status: PaymentStatus,
-        created_at: Optional[datetime.datetime] = None,
-        reason: Optional[str] = None
+        created_at: Optional[datetime.datetime] = None
     ) -> None:
         """
         Initialize payment transaction.
         
         Args:
             order_id: Associated order ID
-            amount: Payment amount (positive for payments, negative for refunds)
+            amount: Payment amount  
             payment_method: Payment method used
             status: Transaction status
             created_at: Transaction timestamp (defaults to now)
-            reason: Optional reason (used for refunds)
         """
         self.__validate(order_id, amount)
         
         self.__order_id = order_id
-        self.__amount = Money(abs(amount))  # Store as positive, track sign separately
-        self.__is_refund = amount < 0
+        self.__amount = Money(amount) 
         self.__payment_method = payment_method
         self.__status = status
         self.__created_at = created_at or datetime.datetime.now()
-        self.__reason = reason
 
     def __validate(
         self,
@@ -51,8 +47,8 @@ class PaymentTransaction:
         if not isinstance(order_id, int) or order_id <= 0:
             raise ValueError("Order ID must be a positive integer")
         
-        if not isinstance(amount, (int, float)) or amount == 0:
-            raise ValueError("Amount must be a non-zero number")
+        if not isinstance(amount, (int, float)) or amount <= 0:
+            raise ValueError("Amount must be a positive number")
 
     @property
     def order_id(self) -> int:
@@ -61,13 +57,8 @@ class PaymentTransaction:
 
     @property
     def amount(self) -> Money:
-        """Get transaction amount (always positive)."""
+        """Get transaction amount."""
         return self.__amount
-
-    @property
-    def signed_amount(self) -> float:
-        """Get signed amount (negative for refunds)."""
-        return -self.__amount.value if self.__is_refund else self.__amount.value
 
     @property
     def payment_method(self) -> PaymentMethod:
@@ -84,31 +75,6 @@ class PaymentTransaction:
         """Get creation timestamp."""
         return self.__created_at
 
-    @property
-    def is_refund(self) -> bool:
-        """Check if this is a refund transaction."""
-        return self.__is_refund
-
-    @property
-    def reason(self) -> Optional[str]:
-        """Get transaction reason (usually for refunds)."""
-        return self.__reason
-
-    def can_be_refunded(self) -> bool:
-        """
-        Check if this payment can be refunded.
-        
-        Returns:
-            bool: True if payment can be refunded
-        """
-        if self.__is_refund:
-            return False  # Cannot refund a refund
-        
-        if self.__status != PaymentStatus.COMPLETED:
-            return False  # Can only refund completed payments
-        
-        return True
-
     def to_dict(self) -> dict[str, Any]:
         """
         Convert to dictionary for backward compatibility.
@@ -118,24 +84,22 @@ class PaymentTransaction:
         """
         return {
             "order_id": self.__order_id,
-            "amount": self.signed_amount,
+            "amount": self.__amount.value,
             "payment_method": self.__payment_method,
             "status": self.__status,
-            "created_at": self.__created_at,
-            "reason": self.__reason
+            "created_at": self.__created_at
         }
 
     def __str__(self) -> str:
         """String representation of payment transaction."""
-        amount_str = f"-${self.__amount.value}" if self.__is_refund else f"${self.__amount.value}"
-        return f"Payment {amount_str} for order {self.__order_id} via {self.__payment_method.value}"
+        return f"Payment ${self.__amount.value} for order {self.__order_id} via {self.__payment_method.value}"
 
     def __repr__(self) -> str:
         """Detailed representation of payment transaction."""
         return (
             f"PaymentTransaction("
             f"order_id={self.__order_id}, "
-            f"amount={self.signed_amount}, "
+            f"amount={self.__amount.value}, "
             f"payment_method={self.__payment_method}, "
             f"status={self.__status}, "
             f"created_at={self.__created_at})"
@@ -149,11 +113,9 @@ class PaymentTransaction:
         return (
             self.__order_id == other.order_id and
             self.__amount == other.amount and
-            self.__is_refund == other.is_refund and
             self.__payment_method == other.payment_method and
             self.__status == other.status and
-            self.__created_at == other.created_at and
-            self.__reason == other.reason
+            self.__created_at == other.created_at
         )
 
     def __hash__(self) -> int:
@@ -161,9 +123,7 @@ class PaymentTransaction:
         return hash((
             self.__order_id,
             self.__amount,
-            self.__is_refund,
             self.__payment_method,
             self.__status,
-            self.__created_at,
-            self.__reason
+            self.__created_at
         ))

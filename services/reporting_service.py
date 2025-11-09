@@ -1,8 +1,9 @@
 """Reporting Service - Handles sales reports and analytics."""
 
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import datetime
 from domain.enums.order_status import OrderStatus
+from domain.value_objects.sales_report import SalesReport
 
 if TYPE_CHECKING:
     from services.customer_service import CustomerService
@@ -52,7 +53,7 @@ class ReportingService:
         self,
         start_date: datetime.datetime,
         end_date: datetime.datetime
-    ) -> dict[str, Any]:
+    ) -> SalesReport:
         """
         Generate comprehensive sales report for date range.
 
@@ -61,16 +62,14 @@ class ReportingService:
             end_date: Report end date
 
         Returns:
-            Report dictionary with sales metrics
+            SalesReport value object with sales metrics
         """
-        report: dict[str, Any] = {
-            'total_sales': 0.0,
-            'total_orders': 0,
-            'cancelled_orders': 0,
-            'products_sold': {},
-            'revenue_by_category': {},
-            'top_customers': []
-        }
+        # Initialize metrics
+        total_sales = 0.0
+        total_orders = 0
+        cancelled_orders = 0
+        products_sold: dict[int, int] = {}
+        revenue_by_category: dict[str, float] = {}
 
         orders = self.__order_service.get_all_orders()
         products = self.__product_service.get_all_products()
@@ -79,36 +78,42 @@ class ReportingService:
         for order in orders.values():
             if start_date <= order.created_at <= end_date:
                 if order.status != OrderStatus.CANCELLED:
-                    report['total_sales'] += order.total_price.value
-                    report['total_orders'] += 1
+                    total_sales += order.total_price.value
+                    total_orders += 1
 
                     # Aggregate products sold
                     for item in order.items:
                         product = products.get(item.product_id)
                         if product:
                             # Count products sold
-                            products_sold_dict: dict[int, int] = report['products_sold']
-                            if product.product_id not in products_sold_dict:
-                                products_sold_dict[product.product_id] = 0
-                            products_sold_dict[product.product_id] += item.quantity
+                            if product.product_id not in products_sold:
+                                products_sold[product.product_id] = 0
+                            products_sold[product.product_id] += item.quantity
 
                             # Revenue by category
-                            revenue_dict: dict[str, float] = report['revenue_by_category']
-                            if product.category not in revenue_dict:
-                                revenue_dict[product.category] = 0.0
+                            if product.category not in revenue_by_category:
+                                revenue_by_category[product.category] = 0.0
 
                             # Extract Money value
                             item_price = item.unit_price.value
-                            revenue_dict[product.category] += (
+                            revenue_by_category[product.category] += (
                                 item.quantity * item_price
                             )
                 else:
-                    report['cancelled_orders'] += 1
+                    cancelled_orders += 1
 
         # Calculate top customers
-        report['top_customers'] = self.__get_top_customers(limit=10)
+        top_customers = self.__get_top_customers(limit=10)
 
-        return report
+        # Return SalesReport value object
+        return SalesReport(
+            total_sales=total_sales,
+            total_orders=total_orders,
+            cancelled_orders=cancelled_orders,
+            products_sold=products_sold,
+            revenue_by_category=revenue_by_category,
+            top_customers=top_customers
+        )
 
     def __get_top_customers(self, limit: int = 10) -> list[tuple[int, float]]:
         """

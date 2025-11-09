@@ -257,14 +257,13 @@ class OrderService:
                     item.quantity,
                     f"order_cancelled_{order_id}"
                 )
-
-        # Process refund
-        self.__payment_service.process_refund(
-            order_id=order_id,
-            amount=order.total_price.value,
-            reason=reason
-        )
-
+        
+        # Send cancellation notification like legacy system
+        customer = self.__customer_service.get_customer(order.customer_id)
+        if customer:
+            self.__notification_service.send_order_cancellation(
+                customer, order_id, reason)
+        
         print(f"Order {order_id} cancelled: {reason}")
         return True
 
@@ -339,18 +338,11 @@ class OrderService:
         if not order:
             return None
 
-        customer = self.__customer_service.get_customer(order.customer_id)
-
         # If shipped, create tracking
         if new_status == OrderStatus.SHIPPED:
             tracking_number = self.ship_order(order_id)
             if tracking_number:
                 order.tracking_number = tracking_number
-                if customer:
-                    print(f"To: {customer.email.value}: Order {order_id} status changed to {new_status}")
-        else:
-            if customer:
-                print(f"To: {customer.email.value}: Order {order_id} status changed to {new_status}")
 
         return order
 

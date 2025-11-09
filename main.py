@@ -101,10 +101,10 @@ print("\n10. Generating sales report...")
 start = datetime.datetime.now() - datetime.timedelta(days=1)
 end = datetime.datetime.now() + datetime.timedelta(days=1)
 report = order_processor.generate_sales_report(start, end)
-print(f"Total Sales: ${report['total_sales']:.2f}")
-print(f"Total Orders: {report['total_orders']}")
+print(f"Total Sales: ${report.total_sales:.2f}")
+print(f"Total Orders: {report.total_orders}")
 print("Revenue by Category:")
-revenue_by_category: dict[str, float] = report['revenue_by_category']
+revenue_by_category: dict[str, float] = report.revenue_by_category
 for category, revenue in revenue_by_category.items():
     print(f"  {category}: ${revenue:.2f}")
 

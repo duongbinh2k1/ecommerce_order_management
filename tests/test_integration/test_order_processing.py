@@ -244,11 +244,11 @@ class TestOrderProcessingIntegration(unittest.TestCase):
         report = self.app.generate_sales_report(start_date, end_date)
         
         # Verify report contains data
-        total_sales: float = report['total_sales']
+        total_sales: float = report.total_sales
         self.assertGreater(total_sales, 0)
-        total_orders: int = report['total_orders']
+        total_orders: int = report.total_orders
         self.assertGreaterEqual(total_orders, 2)
-        revenue_by_category: dict[str, float] = report['revenue_by_category']
+        revenue_by_category: dict[str, float] = report.revenue_by_category
         self.assertIn('Electronics', revenue_by_category)
 
 

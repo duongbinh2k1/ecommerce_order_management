@@ -10,6 +10,7 @@ from domain.models.order_item import OrderItem
 from domain.models.product import Product
 from domain.models.customer import Customer
 from domain.models.order import Order
+from domain.value_objects.sales_report import SalesReport
 from domain.models.supplier import Supplier
 from domain.models.promotion import Promotion
 from domain.enums.shipping_method import ShippingMethod
@@ -175,7 +176,7 @@ class OrderProcessor:
         """Get products with low stock."""
         return self._inventory_service.get_low_stock_products(threshold)
 
-    def generate_sales_report(self, start_date: datetime.datetime, end_date: datetime.datetime) -> dict[str, Any]:
+    def generate_sales_report(self, start_date: datetime.datetime, end_date: datetime.datetime) -> SalesReport:
         """Generate sales report."""
         return self._reporting_service.generate_sales_report(start_date, end_date)
 

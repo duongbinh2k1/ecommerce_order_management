@@ -7,7 +7,6 @@ from domain.models.product import Product
 from domain.models.promotion import Promotion
 from domain.models.shipment import Shipment
 from domain.models.supplier import Supplier
-from domain.models.payment_transaction import PaymentTransaction
 
 __all__ = [
     'Customer',
@@ -17,5 +16,4 @@ __all__ = [
     'Promotion',
     'Shipment',
     'Supplier',
-    'PaymentTransaction'
 ]

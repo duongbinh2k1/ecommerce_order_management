@@ -1,6 +1,6 @@
 """Notification Service - Handles customer notifications."""
 
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from domain.models.customer import Customer
@@ -8,11 +8,7 @@ if TYPE_CHECKING:
 
 
 class NotificationService:
-    """Service for sending notifications to customers."""
-
-    def __init__(self) -> None:
-        """Initialize the notification service."""
-        self.__notification_log: list[dict[str, Any]] = []
+    """Service for sending notifications to customers (print-based like legacy)."""
 
     def send_order_confirmation(
         self,
@@ -31,42 +27,25 @@ class NotificationService:
         if hasattr(customer, 'phone') and customer.phone:
             print(f"SMS to {customer.phone.value}: Order {order.order_id} confirmed")
 
-        self.__notification_log.append({
-            'customer_id': customer.customer_id,
-            'order_id': order.order_id,
-            'type': 'order_confirmation',
-            'total': order.total_price.value
-        })
-
     def send_shipment_notification(
         self,
         customer: 'Customer',
-        order_id: int,
-        tracking_number: str
+        order_id: int
     ) -> None:
         """
-        Send shipment notification with tracking.
+        Send shipment notification.
 
         Args:
             customer: Customer receiving the shipment
             order_id: Order identifier
-            tracking_number: Tracking number
         """
         # Format exactly like legacy system
         print(f"To: {customer.email.value}: Order {order_id} status changed to shipped")
 
-        self.__notification_log.append({
-            'customer_id': customer.customer_id,
-            'order_id': order_id,
-            'type': 'shipment',
-            'tracking_number': tracking_number
-        })
-
     def send_low_stock_alert(
         self,
         supplier_email: str,
-        product_name: str,
-        current_stock: int
+        product_name: str
     ) -> None:
         """
         Send low stock alert to supplier.
@@ -74,21 +53,9 @@ class NotificationService:
         Args:
             supplier_email: Supplier email address
             product_name: Product name
-            current_stock: Current stock level
         """
-        message = (
-            f"Low Stock Alert!\n"
-            f"Product: {product_name}\n"
-            f"Current stock: {current_stock}"
-        )
-
-        print(f"[EMAIL to {supplier_email}] {message}")
-
-        self.__notification_log.append({
-            'supplier_email': supplier_email,
-            'type': 'low_stock_alert',
-            'message': message
-        })
+        # Format exactly like legacy system
+        print(f"Email to {supplier_email}: Low stock alert for {product_name}")
 
     def send_membership_upgrade(
         self,
@@ -102,24 +69,38 @@ class NotificationService:
             customer: Customer who was upgraded
             new_tier: New membership tier
         """
-        message = (
-            f"Congratulations {customer.name}!\n"
-            f"Your membership has been upgraded to {new_tier}!"
-        )
+        # Format exactly like legacy system
+        message = f"Customer {customer.name} upgraded to {new_tier}!"
+        print(message)
 
-        print(f"[EMAIL to {customer.email.value}] {message}")
-
-        self.__notification_log.append({
-            'customer_id': customer.customer_id,
-            'type': 'membership_upgrade',
-            'message': message
-        })
-
-    def get_notification_log(self) -> list[dict[str, Any]]:
+    def send_marketing_email(
+        self,
+        customer_email: str,
+        message: str
+    ) -> None:
         """
-        Get all notification logs.
+        Send marketing email to customer.
 
-        Returns:
-            List of notification records
+        Args:
+            customer_email: Customer email address
+            message: Marketing message
         """
-        return self.__notification_log.copy()
+        # Format exactly like legacy system
+        print(f"Email to {customer_email}: {message}")
+
+    def send_order_cancellation(
+        self,
+        customer: 'Customer',
+        order_id: int,
+        reason: str
+    ) -> None:
+        """
+        Send order cancellation notification.
+
+        Args:
+            customer: Customer who cancelled order
+            order_id: Order identifier
+            reason: Cancellation reason
+        """
+        # Format exactly like legacy system
+        print(f"To: {customer.email.value}: Order {order_id} has been cancelled. Reason: {reason}")

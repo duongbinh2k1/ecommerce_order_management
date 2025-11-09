@@ -3,7 +3,7 @@
 from typing import Optional, Any
 from domain.enums.payment_method import PaymentMethod
 from domain.enums.payment_status import PaymentStatus
-from domain.models.payment_transaction import PaymentTransaction
+from domain.value_objects.payment_transaction import PaymentTransaction
 
 
 class PaymentService:
@@ -82,51 +82,6 @@ class PaymentService:
         self.__payment_history.append(transaction)
 
         return True, None
-
-    def process_refund(
-        self,
-        order_id: int,
-        amount: float,
-        reason: str
-    ) -> bool:
-        """
-        Process a refund for an order.
-
-        Args:
-            order_id: Order identifier
-            amount: Refund amount
-            reason: Refund reason
-
-        Returns:
-            True if successful
-        """
-        # Find original payment transaction
-        original_payment = None
-        for transaction in self.__payment_history:
-            if (transaction.order_id == order_id and 
-                not transaction.is_refund and
-                transaction.status == PaymentStatus.COMPLETED):
-                original_payment = transaction
-                break
-
-        if not original_payment:
-            return False
-
-        # Check if refundable
-        if not original_payment.can_be_refunded():
-            return False
-
-        # Create refund transaction
-        refund_transaction = PaymentTransaction(
-            order_id=order_id,
-            amount=-amount,  # Negative for refund
-            payment_method=original_payment.payment_method,
-            status=PaymentStatus.REFUNDED,
-            reason=reason
-        )
-        self.__payment_history.append(refund_transaction)
-
-        return True
 
     def get_payment_history(self, order_id: int) -> list[dict[str, Any]]:
         """

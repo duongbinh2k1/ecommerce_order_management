@@ -1,8 +1,8 @@
 """Inventory Service - Manages inventory and stock operations."""
 
-from typing import Any, Optional, TYPE_CHECKING
-import datetime
+from typing import Optional, TYPE_CHECKING
 from domain.models.product import Product
+from domain.value_objects.inventory_log_entry import InventoryLogEntry
 
 if TYPE_CHECKING:
     from services.product_service import ProductService
@@ -19,7 +19,7 @@ class InventoryService:
             product_service: ProductService instance for product lookups
         """
         self.__product_service = product_service
-        self.__inventory_logs: list[dict[str, Any]] = []
+        self.__inventory_logs: list[InventoryLogEntry] = []
 
     def log_inventory_change(
         self,
@@ -35,12 +35,11 @@ class InventoryService:
             quantity_change: The quantity change (positive or negative)
             reason: Reason for the change (e.g., 'initial_stock', 'restock', 'sale')
         """
-        self.__inventory_logs.append({
-            'product_id': product_id,
-            'quantity_change': quantity_change,
-            'reason': reason,
-            'timestamp': datetime.datetime.now()
-        })
+        self.__inventory_logs.append(InventoryLogEntry(
+            product_id=product_id,
+            quantity_change=quantity_change,
+            reason=reason
+        ))
 
     def restock_product(
         self,
@@ -115,7 +114,7 @@ class InventoryService:
             return False
         return bool(product.quantity_available >= required_quantity)
 
-    def get_inventory_logs(self) -> list[dict[str, str | int | float]]:
+    def get_inventory_logs(self) -> list[InventoryLogEntry]:
         """
         Get all inventory change logs.
 
@@ -123,3 +122,12 @@ class InventoryService:
             List of inventory log entries
         """
         return self.__inventory_logs.copy()
+
+    def get_inventory_logs_as_dicts(self) -> list[dict[str, str | int | float]]:
+        """
+        Get inventory logs as dictionaries for backward compatibility.
+
+        Returns:
+            List of inventory log entries as dictionaries
+        """
+        return [log.to_dict() for log in self.__inventory_logs]
