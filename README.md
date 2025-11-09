@@ -245,7 +245,7 @@ python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 # Install lib
-pip install coverage
+pip install coverage mypy
 
 ### Run the System
 ```bash
