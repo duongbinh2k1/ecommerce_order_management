@@ -121,6 +121,39 @@ The refactored system maintains all original functionality while adding signific
 - **Highly testable**: Easy to inject mocks for testing
 
 ## Architecture Overview
+### Architecture Diagram
+```
+         +-------------------+
+         |   Application     |
+         |  (order_processor)|
+         +-------------------+
+                  |
+                  v
+         +-------------------+
+         |     Services      |
+         | (pricing, payment,|
+         |  shipping, etc.)  |
+         +-------------------+
+                  |
+                  v
+         +-------------------+
+         |   Repositories    |
+         | (interfaces, impl)|
+         +-------------------+
+                  |
+                  v
+         +-------------------+
+         |      Domain       |
+         | (models, enums,   |
+         |  value_objects)   |
+         +-------------------+
+                  |
+                  v
+         +-------------------+
+         |      Tests        |
+         | (unit, integration|
+         +-------------------+
+```
 
 ### Current Architecture
 ```
