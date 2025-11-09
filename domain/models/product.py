@@ -17,12 +17,11 @@ class Product:
         weight: Union[int, float],
         supplier_id: int
     ) -> None:
-        price_obj = Money(price)
-        self.__validate(name, price_obj, quantity_available, weight)
+        self.__validate(name, price, quantity_available, weight)
 
         self.__product_id: int = product_id
         self.__name: str = name
-        self.__price: Money = price_obj
+        self.__price: Money = Money(price)
         self.__quantity_available: int = quantity_available
         self.__category: str = category
         self.__weight: Union[int, float] = weight
@@ -32,14 +31,14 @@ class Product:
     def __validate(
         self,
         name: str,
-        price: Money,
+        price: Union[int, float],
         quantity_available: int,
         weight: Union[int, float]
     ) -> None:
         """Validate product business rules"""
         if not name or not isinstance(name, str):
             raise ValueError("Product name must be a non-empty string")
-        if price.value < 0:
+        if price < 0:
             raise ValueError("Product price cannot be negative")
         if quantity_available < 0:
             raise ValueError("Product quantity cannot be negative")

@@ -1,25 +1,24 @@
 """
 Shipment Repository Interface - defines contract for shipment data access
-Note: Shipment is dict-based (not a domain model yet)
 """
-from typing import Any, Protocol, Optional
+from typing import Protocol, Optional, List
+from domain.models.shipment import Shipment
 
 
 class ShipmentRepository(Protocol):
     """
     Interface for shipment data access.
-    Note: Uses dict instead of domain model (legacy compatibility).
     """
 
-    def add(self, shipment: dict[str, Any]) -> None:
+    def add(self, shipment: Shipment) -> None:
         """Add a new shipment"""
         ...
 
-    def get(self, shipment_id: int) -> Optional[dict[str, Any]]:
+    def get(self, shipment_id: int) -> Optional[Shipment]:
         """Retrieve a shipment by ID"""
         ...
 
-    def update(self, shipment: dict[str, Any]) -> None:
+    def update(self, shipment: Shipment) -> None:
         """Update an existing shipment"""
         ...
 
@@ -27,7 +26,7 @@ class ShipmentRepository(Protocol):
         """Remove a shipment"""
         ...
 
-    def get_all(self) -> dict[int, dict[str, Any]]:
+    def get_all(self) -> List[Shipment]:
         """Get all shipments"""
         ...
 
@@ -37,4 +36,12 @@ class ShipmentRepository(Protocol):
 
     def get_next_id(self) -> int:
         """Get next available shipment ID"""
+        ...
+
+    def find_by_order_id(self, order_id: int) -> List[Shipment]:
+        """Find shipments by order ID"""
+        ...
+
+    def find_by_tracking_number(self, tracking_number: str) -> Optional[Shipment]:
+        """Find shipment by tracking number"""
         ...

@@ -19,6 +19,7 @@ from services.notification_service import NotificationService
 from services.order_service import OrderService
 from services.reporting_service import ReportingService
 from services.marketing_service import MarketingService
+from services.shipment_service import ShipmentService
 
 __all__ = [
     'ProductService',
@@ -37,5 +38,6 @@ __all__ = [
     'NotificationService',
     'OrderService',
     'ReportingService',
-    'MarketingService'
+    'MarketingService',
+    'ShipmentService'
 ]

@@ -1,26 +1,11 @@
 """Shipping Service - Handles shipping calculations and logistics."""
 
-from typing import TYPE_CHECKING, Any
 from domain.enums.shipping_method import ShippingMethod
 from domain.enums.membership_tier import MembershipTier
-from domain.enums.shipment_status import ShipmentStatus
-from repositories.interfaces.shipment_repository import ShipmentRepository
-
-if TYPE_CHECKING:
-    from domain.models.customer import Customer
 
 
 class ShippingService:
-    """Service for shipping cost calculations and shipment management."""
-
-    def __init__(self, shipment_repository: ShipmentRepository) -> None:
-        """
-        Initialize the shipping service.
-        
-        Args:
-            shipment_repository: Repository for shipment data access (DI)
-        """
-        self.__repository = shipment_repository
+    """Service for shipping cost calculations and delivery estimates."""
 
     def calculate_shipping_cost(
         self,
@@ -59,75 +44,3 @@ class ShippingService:
             shipping_cost = 50 + (total_weight * 1.0)
 
         return shipping_cost
-
-    def create_shipment(
-        self,
-        order_id: int,
-        shipping_method: ShippingMethod,
-        address: str
-    ) -> str:
-        """
-        Create a new shipment and generate tracking number.
-
-        Args:
-            order_id: Order identifier
-            shipping_method: Shipping method
-            address: Delivery address
-
-        Returns:
-            Tracking number
-        """
-        import random
-        shipment_id = self.__repository.get_next_id()
-        tracking_number = f"TRACK{order_id}{random.randint(1000, 9999)}"
-
-        shipment: dict[str, Any] = {
-            'shipment_id': shipment_id,
-            'order_id': order_id,
-            'tracking_number': tracking_number,
-            'shipping_method': shipping_method,
-            'address': address,
-            'status': ShipmentStatus.PENDING
-        }
-        self.__repository.add(shipment)
-
-        return tracking_number
-
-    def update_shipment_status(
-        self,
-        tracking_number: str,
-        new_status: str
-    ) -> bool:
-        """
-        Update shipment status.
-
-        Args:
-            tracking_number: Tracking number
-            new_status: New status (e.g., 'in_transit', 'delivered')
-
-        Returns:
-            True if successful, False if tracking number not found
-        """
-        # Find shipment by tracking number
-        for shipment in self.__repository.get_all().values():
-            if shipment.get('tracking_number') == tracking_number:
-                shipment['status'] = new_status
-                self.__repository.update(shipment)
-                return True
-        return False
-
-    def get_tracking_info(self, tracking_number: str) -> dict[str, Any]:
-        """
-        Get shipment tracking information.
-
-        Args:
-            tracking_number: Tracking number
-
-        Returns:
-            Tracking information dictionary or empty dict if not found
-        """
-        # Find shipment by tracking number
-        for shipment in self.__repository.get_all().values():
-            if shipment.get('tracking_number') == tracking_number:
-                return shipment
-        return {}

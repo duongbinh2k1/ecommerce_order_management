@@ -17,13 +17,12 @@ class Promotion:
         valid_until: datetime.datetime,
         category: str
     ) -> None:
-        min_purchase_obj = Money(min_purchase)
-        self.__validate(code, discount_percent, min_purchase_obj)
+        self.__validate(code, discount_percent, min_purchase)
 
         self.__promo_id: int = promo_id
         self.__code: str = code
         self.__discount_percent: Union[int, float] = discount_percent
-        self.__min_purchase: Money = min_purchase_obj
+        self.__min_purchase: Money = Money(min_purchase)
         self.__valid_until: datetime.datetime = valid_until
         self.__category: str = category
         self.__used_count: int = 0
@@ -32,14 +31,14 @@ class Promotion:
         self,
         code: str,
         discount_percent: Union[int, float],
-        min_purchase: Money
+        min_purchase: Union[int, float]
     ) -> None:
         """Validate promotion business rules"""
         if not code or not isinstance(code, str):
             raise ValueError("Promotion code must be a non-empty string")
         if discount_percent < 0 or discount_percent > 100:
             raise ValueError("Discount percent must be between 0 and 100")
-        if min_purchase.value < 0:
+        if min_purchase < 0:
             raise ValueError("Minimum purchase cannot be negative")
 
     @property

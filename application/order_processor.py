@@ -38,7 +38,8 @@ from services import (
     NotificationService,
     OrderService,
     ReportingService,
-    MarketingService
+    MarketingService,
+    ShipmentService
 )
 
 
@@ -67,7 +68,8 @@ class OrderProcessor:
         self._supplier_service = SupplierService(self._supplier_repository)
         self._promotion_service = PromotionService(self._promotion_repository)
         self._pricing_service = PricingService()
-        self._shipping_service = ShippingService(self._shipment_repository)
+        self._shipping_service = ShippingService()
+        self._shipment_service = ShipmentService(self._shipment_repository)
         self._payment_service = PaymentService()
         self._notification_service = NotificationService()
 
@@ -78,6 +80,7 @@ class OrderProcessor:
             pricing_service=self._pricing_service,
             payment_service=self._payment_service,
             shipping_service=self._shipping_service,
+            shipment_service=self._shipment_service,
             notification_service=self._notification_service,
             inventory_service=self._inventory_service,
             promotion_service=self._promotion_service

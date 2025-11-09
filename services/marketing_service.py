@@ -1,8 +1,9 @@
 """Marketing Service - Handles customer segmentation and campaigns."""
 
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import datetime
 from domain.enums.membership_tier import MembershipTier
+from domain.enums.customer_segment import CustomerSegment
 
 if TYPE_CHECKING:
     from services.customer_service import CustomerService
@@ -23,14 +24,14 @@ class MarketingService:
 
     def send_marketing_email(
         self,
-        customer_segment: str,
+        customer_segment: CustomerSegment,
         message: str
     ) -> int:
         """
         Send marketing email to a customer segment.
 
         Args:
-            customer_segment: Segment type ('all', 'gold', 'inactive', etc.)
+            customer_segment: Customer segment enum
             message: Email message content
 
         Returns:
@@ -42,20 +43,17 @@ class MarketingService:
         for customer in customers.values():
             send = False
 
-            if customer_segment == 'all':
+            if customer_segment == CustomerSegment.ALL:
                 send = True
-            elif customer_segment == MembershipTier.GOLD:
-                send = customer.membership_tier == MembershipTier.GOLD
-            elif customer_segment == MembershipTier.SILVER:
-                send = customer.membership_tier == MembershipTier.SILVER
-            elif customer_segment == MembershipTier.BRONZE:
-                send = customer.membership_tier == MembershipTier.BRONZE
-            elif customer_segment == 'inactive':
+            elif customer_segment == CustomerSegment.GOLD and customer.membership_tier == MembershipTier.GOLD:
+                send = True
+            elif customer_segment == CustomerSegment.INACTIVE:
                 # Check if customer has ordered in last 90 days
-                send = self.__is_customer_inactive(customer.customer_id)
+                if self.__is_customer_inactive(customer.customer_id):
+                    send = True
 
             if send:
-                print(f"[MARKETING EMAIL to {customer.email.value}] {message}")
+                print(f"Email to {customer.email.value}: {message}")
                 count += 1
 
         return count
@@ -88,37 +86,3 @@ class MarketingService:
                 return False
 
         return True
-
-    def get_inactive_customers(self, days_threshold: int = 90) -> list[int]:
-        """
-        Get list of inactive customers.
-
-        Args:
-            days_threshold: Number of days to consider inactive
-
-        Returns:
-            List of inactive customer IDs
-        """
-        inactive = []
-        customers = self.__customer_service.get_all_customers()
-
-        for customer_id in customers.keys():
-            if self.__is_customer_inactive(customer_id, days_threshold):
-                inactive.append(customer_id)
-
-        return inactive
-
-    def segment_customers_by_value(self) -> dict[str, list[int]]:
-        """
-        Segment customers by lifetime value.
-
-        Returns:
-            Dictionary with customer segments
-        """
-        
-        # Would need ReportingService injected, for now return placeholder
-        return {
-            'high_value': [],
-            'medium_value': [],
-            'low_value': []
-        }

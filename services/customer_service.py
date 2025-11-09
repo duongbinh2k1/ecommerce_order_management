@@ -23,7 +23,7 @@ class CustomerService:
         customer_id: int,
         name: str,
         email: str,
-        tier: MembershipTier,
+        tier: str,
         phone: str,
         address: str
     ) -> Customer:
@@ -195,10 +195,13 @@ class CustomerService:
         # Upgrade rules based on lifetime value
         if lifetime_value >= 1000 and current_tier != MembershipTier.GOLD:
             new_tier = MembershipTier.GOLD
+            print(f"Customer {customer.name} upgraded to Gold!")
         elif lifetime_value >= 500 and current_tier == MembershipTier.STANDARD:
             new_tier = MembershipTier.SILVER
+            print(f"Customer {customer.name} upgraded to Silver!")
         elif lifetime_value >= 200 and current_tier == MembershipTier.STANDARD:
             new_tier = MembershipTier.BRONZE
+            print(f"Customer {customer.name} upgraded to Bronze!")
 
         if new_tier:
             return self.upgrade_membership(customer_id, new_tier)

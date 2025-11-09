@@ -13,19 +13,18 @@ class OrderItem:
         quantity: int,
         unit_price: Union[int, float]
     ) -> None:
-        unit_price_obj = Money(unit_price)
-        self.__validate(quantity, unit_price_obj)
+        self.__validate(quantity, unit_price)
 
         self.__product_id: int = product_id
         self.__quantity: int = quantity
-        self.__unit_price: Money = unit_price_obj
+        self.__unit_price: Money = Money(unit_price)
         self.__discount_applied: Union[int, float] = 0
 
-    def __validate(self, quantity: int, unit_price: Money) -> None:
+    def __validate(self, quantity: int, unit_price: Union[int, float]) -> None:
         """Validate order item business rules"""
         if quantity <= 0:
             raise ValueError("Order quantity must be positive")
-        if unit_price.value < 0:
+        if unit_price < 0:
             raise ValueError("Unit price cannot be negative")
 
     @property

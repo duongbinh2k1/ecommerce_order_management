@@ -20,38 +20,36 @@ class Order:
         order_id: int,
         customer_id: int,
         items: List['OrderItem'],
-        status: OrderStatus,
+        status: str,
         created_at: datetime.datetime,
         total_price: Union[int, float],
         shipping_cost: Union[int, float]
     ) -> None:
-        total_price_obj = Money(total_price)
-        shipping_cost_obj = Money(shipping_cost)
 
-        self.__validate(items, total_price_obj, shipping_cost_obj)
+        self.__validate(items, total_price, shipping_cost)
 
         self.__order_id: int = order_id
         self.__customer_id: int = customer_id
         self.__items: List['OrderItem'] = items
-        self.__status: OrderStatus = status
+        self.__status: OrderStatus = OrderStatus(status)
         self.__created_at: datetime.datetime = created_at
-        self.__total_price: Money = total_price_obj
-        self.__shipping_cost: Money = shipping_cost_obj
+        self.__total_price: Money = Money(total_price)
+        self.__shipping_cost: Money = Money(shipping_cost)
         self.__tracking_number: Optional[str] = None
         self.__payment_method: Optional[PaymentMethod] = None
 
     def __validate(
         self,
         items: List['OrderItem'],
-        total_price: Money,
-        shipping_cost: Money
+        total_price: Union[int, float],
+        shipping_cost: Union[int, float]
     ) -> None:
         """Validate order business rules"""
         if not items:
             raise ValueError("Order must have at least one item")
-        if total_price.value < 0:
+        if total_price < 0:
             raise ValueError("Total price cannot be negative")
-        if shipping_cost.value < 0:
+        if shipping_cost < 0:
             raise ValueError("Shipping cost cannot be negative")
 
     @property

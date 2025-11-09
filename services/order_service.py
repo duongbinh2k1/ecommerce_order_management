@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from services.pricing.pricing_service import PricingService
     from services.payment_service import PaymentService
     from services.shipping_service import ShippingService
+    from services.shipment_service import ShipmentService
     from services.notification_service import NotificationService
     from services.inventory_service import InventoryService
     from services.promotion_service import PromotionService
@@ -32,6 +33,7 @@ class OrderService:
         pricing_service: 'PricingService',
         payment_service: 'PaymentService',
         shipping_service: 'ShippingService',
+        shipment_service: 'ShipmentService',
         notification_service: 'NotificationService',
         inventory_service: 'InventoryService',
         promotion_service: Optional['PromotionService'] = None
@@ -49,6 +51,7 @@ class OrderService:
         self.__pricing_service = pricing_service
         self.__payment_service = payment_service
         self.__shipping_service = shipping_service
+        self.__shipment_service = shipment_service
         self.__notification_service = notification_service
         self.__inventory_service = inventory_service
         self.__promotion_service = promotion_service
@@ -278,9 +281,9 @@ class OrderService:
             return None
 
         # Create shipment
-        tracking_number = self.__shipping_service.create_shipment(
+        tracking_number = self.__shipment_service.create_shipment(
             order_id=order_id,
-            shipping_method=ShippingMethod.STANDARD,  # TODO: Add shipping_method to Order model
+            shipping_method=ShippingMethod.STANDARD,
             address=customer.address.value
         )
 

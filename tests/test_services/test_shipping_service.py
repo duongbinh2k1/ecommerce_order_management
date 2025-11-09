@@ -1,6 +1,5 @@
 """Test cases for ShippingService."""
 import unittest
-from unittest.mock import Mock
 from services.shipping_service import ShippingService
 from domain.enums.shipping_method import ShippingMethod
 from domain.enums.membership_tier import MembershipTier
@@ -11,10 +10,7 @@ class TestShippingService(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test dependencies."""
-        self.shipment_repository = Mock()
-        self.shipment_repository.get_next_id.return_value = 1
-        
-        self.shipping_service = ShippingService(self.shipment_repository)
+        self.shipping_service = ShippingService()
 
     def test_calculate_shipping_cost_express_gold(self) -> None:
         """Test express shipping cost for gold member."""
@@ -80,120 +76,66 @@ class TestShippingService(unittest.TestCase):
         expected_cost = 50 + (3.0 * 1.0)
         self.assertEqual(cost, expected_cost)
 
-    def test_create_shipment_string_method(self) -> None:
-        """Test creating shipment with enum shipping method."""
-        tracking = self.shipping_service.create_shipment(
-            order_id=123,
-            shipping_method=ShippingMethod.EXPRESS,  # Use enum
-            address="123 Main St"
-        )
-        
-        self.assertTrue(tracking.startswith("TRACK123"))
-        self.shipment_repository.add.assert_called_once()
-        
-        # Verify shipment data
-        call_args = self.shipment_repository.add.call_args[0][0]
-        self.assertEqual(call_args['order_id'], 123)
-        self.assertEqual(call_args['shipping_method'], ShippingMethod.EXPRESS.value)
-        self.assertEqual(call_args['address'], "123 Main St")
-        self.assertEqual(call_args['status'], 'pending')
-
-    def test_create_shipment_enum_method(self) -> None:
-        """Test creating shipment with enum shipping method."""
-        tracking = self.shipping_service.create_shipment(
-            order_id=456,
+    def test_estimate_delivery_time_standard(self) -> None:
+        """Test delivery time estimation for standard shipping."""
+        time = self.shipping_service.estimate_delivery_time(
             shipping_method=ShippingMethod.STANDARD,
-            address="456 Oak Ave"
+            distance_km=100.0
         )
         
-        self.assertTrue(tracking.startswith("TRACK456"))
-        self.shipment_repository.add.assert_called_once()
-        
-        # Verify shipment data
-        call_args = self.shipment_repository.add.call_args[0][0]
-        self.assertEqual(call_args['shipping_method'], "standard")
+        # Standard: 72 hours base time
+        self.assertEqual(time, 72)
 
-    def test_update_shipment_status_success(self) -> None:
-        """Test updating shipment status successfully."""
-        # Mock existing shipment
-        existing_shipment = {
-            'shipment_id': 1,
-            'tracking_number': 'TRACK123',
-            'status': 'pending'
-        }
+    def test_estimate_delivery_time_express_long_distance(self) -> None:
+        """Test delivery time estimation for express shipping with long distance."""
+        time = self.shipping_service.estimate_delivery_time(
+            shipping_method=ShippingMethod.EXPRESS,
+            distance_km=600.0
+        )
         
-        self.shipment_repository.get_all.return_value = {1: existing_shipment}
-        
-        result = self.shipping_service.update_shipment_status('TRACK123', 'in_transit')
-        
-        self.assertTrue(result)
-        self.assertEqual(existing_shipment['status'], 'in_transit')
-        self.shipment_repository.update.assert_called_once_with(existing_shipment)
+        # Express: 24 hours base + 24 hours for long distance = 48
+        self.assertEqual(time, 48)
 
-    def test_update_shipment_status_not_found(self) -> None:
-        """Test updating shipment status when tracking number not found."""
-        self.shipment_repository.get_all.return_value = {}
+    def test_estimate_delivery_time_overnight(self) -> None:
+        """Test delivery time estimation for overnight shipping."""
+        time = self.shipping_service.estimate_delivery_time(
+            shipping_method=ShippingMethod.OVERNIGHT,
+            distance_km=150.0
+        )
         
-        result = self.shipping_service.update_shipment_status('NOTFOUND', 'delivered')
-        
-        self.assertFalse(result)
-        self.shipment_repository.update.assert_not_called()
+        # Overnight: 12 hours base
+        self.assertEqual(time, 12)
 
-    def test_update_shipment_status_multiple_shipments(self) -> None:
-        """Test updating status with multiple shipments."""
-        shipments = {
-            1: {'tracking_number': 'TRACK111', 'status': 'pending'},
-            2: {'tracking_number': 'TRACK222', 'status': 'in_transit'},
-            3: {'tracking_number': 'TRACK333', 'status': 'delivered'}
-        }
+    def test_get_available_shipping_methods_light_package(self) -> None:
+        """Test available shipping methods for light package."""
+        methods = self.shipping_service.get_available_shipping_methods(weight=5.0)
         
-        self.shipment_repository.get_all.return_value = shipments
-        
-        result = self.shipping_service.update_shipment_status('TRACK222', 'delivered')
-        
-        self.assertTrue(result)
-        self.assertEqual(shipments[2]['status'], 'delivered')
-        # Other shipments should remain unchanged
-        self.assertEqual(shipments[1]['status'], 'pending')
-        self.assertEqual(shipments[3]['status'], 'delivered')
+        # All methods should be available for light package
+        expected_methods = [
+            ShippingMethod.STANDARD,
+            ShippingMethod.EXPRESS,
+            ShippingMethod.OVERNIGHT
+        ]
+        self.assertEqual(set(methods), set(expected_methods))
 
-    def test_get_tracking_info_found(self) -> None:
-        """Test getting tracking info when shipment exists."""
-        shipment = {
-            'shipment_id': 1,
-            'tracking_number': 'TRACK123',
-            'order_id': '456',
-            'status': 'in_transit',
-            'address': '123 Main St'
-        }
+    def test_get_available_shipping_methods_medium_package(self) -> None:
+        """Test available shipping methods for medium package."""
+        methods = self.shipping_service.get_available_shipping_methods(weight=15.0)
         
-        self.shipment_repository.get_all.return_value = {1: shipment}
-        
-        result = self.shipping_service.get_tracking_info('TRACK123')
-        
-        self.assertEqual(result, shipment)
+        # Only standard and express available
+        expected_methods = [
+            ShippingMethod.STANDARD,
+            ShippingMethod.EXPRESS
+        ]
+        self.assertEqual(set(methods), set(expected_methods))
 
-    def test_get_tracking_info_not_found(self) -> None:
-        """Test getting tracking info when shipment doesn't exist."""
-        self.shipment_repository.get_all.return_value = {}
+    def test_get_available_shipping_methods_heavy_package(self) -> None:
+        """Test available shipping methods for heavy package."""
+        methods = self.shipping_service.get_available_shipping_methods(weight=25.0)
         
-        result = self.shipping_service.get_tracking_info('NOTFOUND')
-        
-        self.assertEqual(result, {})
-
-    def test_get_tracking_info_multiple_shipments(self) -> None:
-        """Test getting specific tracking info from multiple shipments."""
-        shipments = {
-            1: {'tracking_number': 'TRACK111', 'status': 'pending'},
-            2: {'tracking_number': 'TRACK222', 'status': 'delivered'},
-            3: {'tracking_number': 'TRACK333', 'status': 'in_transit'}
-        }
-        
-        self.shipment_repository.get_all.return_value = shipments
-        
-        result = self.shipping_service.get_tracking_info('TRACK333')
-        
-        self.assertEqual(result, shipments[3])
+        # Only standard available
+        expected_methods = [ShippingMethod.STANDARD]
+        self.assertEqual(methods, expected_methods)
 
     def test_calculate_shipping_cost_zero_weight(self) -> None:
         """Test shipping cost calculation with zero weight."""
