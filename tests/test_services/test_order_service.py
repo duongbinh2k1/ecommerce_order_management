@@ -25,6 +25,7 @@ class TestOrderService(unittest.TestCase):
         self.notification_service = Mock()
         self.inventory_service = Mock()
         self.shipment_service = Mock()
+        self.supplier_service = Mock()  # Add missing supplier_service
         
         self.order_service = OrderService(
             self.order_repository,
@@ -33,9 +34,10 @@ class TestOrderService(unittest.TestCase):
             self.pricing_service,
             self.payment_service,
             self.shipping_service,
+            self.shipment_service,
             self.notification_service,
             self.inventory_service,
-            self.shipment_service
+            self.supplier_service  # Add to constructor call
         )
 
         # Mock customer

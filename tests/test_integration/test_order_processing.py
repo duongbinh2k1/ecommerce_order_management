@@ -178,16 +178,15 @@ class TestOrderProcessingIntegration(unittest.TestCase):
         
         self.assertIsNotNone(order)
         assert order is not None  # Type narrowing for mypy
-        initial_status = order.status
         
         # Update order status
         updated_order = self.app.update_order_status(order.order_id, 'shipped')
         
-        # Verify method returns order (implementation doesn't change status due to immutability)
+        # Verify method returns order and status is updated (like legacy system)
         self.assertIsNotNone(updated_order)
         assert updated_order is not None  # Type narrowing for mypy
-        # In current implementation, Order is immutable so status doesn't change
-        self.assertEqual(updated_order.status, initial_status)
+        # Status should be updated to SHIPPED like legacy system
+        self.assertEqual(updated_order.status, OrderStatus.SHIPPED)
 
     def test_inventory_deduction_after_order(self) -> None:
         """Test that inventory is properly deducted after order."""

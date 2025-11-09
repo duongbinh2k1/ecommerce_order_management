@@ -72,34 +72,45 @@ class SupplierService:
             if supplier.reliability_score >= min_reliability
         ]
 
-    def update_reliability(
+    def update_supplier_reliability(
         self,
         supplier_id: int,
         new_reliability: float
     ) -> bool:
         """
-        Update supplier reliability score.
+        Update supplier's reliability score.
 
         Args:
-            supplier_id: The supplier identifier
+            supplier_id: Supplier identifier
             new_reliability: New reliability score (0-1)
 
         Returns:
-            True if successful, False if supplier not found
+            True if updated successfully, False if supplier not found
         """
         supplier = self.__repository.get(supplier_id)
         if not supplier:
             return False
 
-        # Create updated supplier
-        updated_supplier = Supplier(
-            supplier_id=supplier.supplier_id,
-            name=supplier.name,
-            email=supplier.email.value,  # Extract primitive
-            reliability_score=new_reliability
-        )
-        self.__repository.update(updated_supplier)
+        supplier.reliability_score = max(0.0, min(1.0, new_reliability))
+        self.__repository.update(supplier)
         return True
+
+    def notify_supplier_reorder(self, product_id: int, supplier_id: int) -> None:
+        """
+        Notify supplier about low stock requiring reorder.
+
+        Args:
+            product_id: Product that is low in stock
+            supplier_id: Supplier to notify
+        """
+        supplier = self.__repository.get(supplier_id)
+        if supplier:
+            # Match legacy system: simple print notification
+            print(f"Email to {supplier.email}: Low stock alert for product {product_id}")
+
+    def list_all_suppliers(self) -> list[Supplier]:
+        """Get all suppliers."""
+        return self.__repository.list_all()
 
     def get_all_suppliers(self) -> dict[int, Supplier]:
         """

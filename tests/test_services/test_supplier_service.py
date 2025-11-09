@@ -140,7 +140,7 @@ class TestSupplierService(unittest.TestCase):
         """Test successful reliability update."""
         self.supplier_repository.get.return_value = self.supplier
         
-        result = self.supplier_service.update_reliability(1, 0.95)
+        result = self.supplier_service.update_supplier_reliability(1, 0.95)
         
         self.assertTrue(result)
         self.supplier_repository.get.assert_called_once_with(1)
@@ -155,7 +155,7 @@ class TestSupplierService(unittest.TestCase):
         """Test updating reliability for non-existent supplier."""
         self.supplier_repository.get.return_value = None
         
-        result = self.supplier_service.update_reliability(999, 0.95)
+        result = self.supplier_service.update_supplier_reliability(999, 0.95)
         
         self.assertFalse(result)
         self.supplier_repository.update.assert_not_called()
@@ -200,11 +200,11 @@ class TestSupplierService(unittest.TestCase):
         self.supplier_repository.get.return_value = self.supplier
         
         # Test minimum value
-        result1 = self.supplier_service.update_reliability(1, 0.0)
+        result1 = self.supplier_service.update_supplier_reliability(1, 0.0)
         self.assertTrue(result1)
         
         # Test maximum value
-        result2 = self.supplier_service.update_reliability(1, 1.0)
+        result2 = self.supplier_service.update_supplier_reliability(1, 1.0)
         self.assertTrue(result2)
         
         self.assertEqual(self.supplier_repository.update.call_count, 2)

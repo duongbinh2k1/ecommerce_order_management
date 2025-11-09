@@ -9,6 +9,7 @@ from domain.enums.payment_method import PaymentMethod
 from domain.enums.shipping_method import ShippingMethod
 from domain.enums.membership_tier import MembershipTier
 from repositories.interfaces.order_repository import OrderRepository
+from domain.value_objects.money import Money
 
 if TYPE_CHECKING:
     from services.product_service import ProductService
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
     from services.notification_service import NotificationService
     from services.inventory_service import InventoryService
     from services.promotion_service import PromotionService
+    from services.supplier_service import SupplierService
 
 
 class OrderService:
@@ -36,6 +38,7 @@ class OrderService:
         shipment_service: 'ShipmentService',
         notification_service: 'NotificationService',
         inventory_service: 'InventoryService',
+        supplier_service: 'SupplierService',
         promotion_service: Optional['PromotionService'] = None
     ) -> None:
         """
@@ -44,6 +47,7 @@ class OrderService:
         Args:
             order_repository: Repository for order data access
             product_service, customer_service, etc.: Injected service dependencies
+            supplier_service: Service for supplier operations
         """
         self.__repository = order_repository
         self.__product_service = product_service
@@ -54,6 +58,7 @@ class OrderService:
         self.__shipment_service = shipment_service
         self.__notification_service = notification_service
         self.__inventory_service = inventory_service
+        self.__supplier_service = supplier_service
         self.__promotion_service = promotion_service
 
     def create_order(
@@ -197,6 +202,13 @@ class OrderService:
         # Step 11: Send confirmation notification
         self.__notification_service.send_order_confirmation(customer, order)
 
+        # Step 12: Check for low stock and notify suppliers (match legacy system)
+        for product_id, quantity, _ in order_items:
+            product = products[product_id]
+            if product.quantity_available < 5:  # Low stock threshold like legacy
+                self.__supplier_service.notify_supplier_reorder(
+                    product_id, product.supplier_id)
+
         return order
 
     def __calculate_tax(self, subtotal: float, customer_address: str) -> float:
@@ -257,6 +269,10 @@ class OrderService:
                     item.quantity,
                     f"order_cancelled_{order_id}"
                 )
+        
+        # Update order status to cancelled (like legacy system)
+        order.status = OrderStatus.CANCELLED
+        self.__repository.update(order)
         
         # Send cancellation notification like legacy system
         customer = self.__customer_service.get_customer(order.customer_id)
@@ -338,11 +354,21 @@ class OrderService:
         if not order:
             return None
 
-        # If shipped, create tracking
-        if new_status == OrderStatus.SHIPPED:
+        # Update order status (like legacy system)
+        order.status = new_status
+        self.__repository.update(order)
+
+        # Send notification (like legacy system)
+        customer = self.__customer_service.get_customer(order.customer_id)
+        if customer:
+            print(f"To: {customer.email}: Order {order_id} status changed to {new_status.value}")
+
+        # If shipped, create tracking (like legacy system)
+        if new_status == OrderStatus.SHIPPED and not order.tracking_number:
             tracking_number = self.ship_order(order_id)
             if tracking_number:
                 order.tracking_number = tracking_number
+                self.__repository.update(order)
 
         return order
 
@@ -376,10 +402,16 @@ class OrderService:
             discount_percent=discount_percent
         )
 
+        # Store old price for display
+        old_price = order.total_price.value
+
+        # Update order total price (like legacy system)
+        order.total_price = Money(new_price)
+        self.__repository.update(order)
+
         print(
             f"Applied {discount_percent}% discount to order {order_id}. Reason: {reason}")
         print(
-            f"New total: ${new_price:.2f} (was ${order.total_price.value:.2f})")
+            f"New total: ${new_price:.2f} (was ${old_price:.2f})")
 
-        # Would need to recreate order with new price (immutability)
         return order

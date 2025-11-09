@@ -85,6 +85,7 @@ class OrderProcessor:
             shipment_service=self._shipment_service,
             notification_service=self._notification_service,
             inventory_service=self._inventory_service,
+            supplier_service=self._supplier_service,
             promotion_service=self._promotion_service
         )
 
