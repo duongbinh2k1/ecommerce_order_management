@@ -152,12 +152,12 @@ class TestOrderProcessingIntegration(unittest.TestCase):
             OrderItem(2, 1, 29.99),  # 1 Mouse
         ]
         
-        # Payment info
+        # Payment info - increase amount for full price without discount
         payment = {
             "valid": True,
             "type": "credit_card",
             "card_number": "1234567890123456",
-            "amount": 35
+            "amount": 50  # Increased to cover full price + shipping + tax
         }
         
         # Process order with expired promotion

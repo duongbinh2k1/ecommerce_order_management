@@ -130,19 +130,20 @@ class OrderService:
         # Step 4: Calculate shipping cost
         shipping_cost = self.__shipping_service.calculate_shipping_cost(
             shipping_method=shipping_method,
-            total_weight=pricing_breakdown['total_weight'],
-            subtotal=pricing_breakdown['final_price'],
+            total_weight=pricing_breakdown.total_weight,
+            subtotal=pricing_breakdown.subtotal_after_loyalty.value,
             customer_tier=customer.membership_tier
         )
 
         # Step 5: Calculate tax
         tax = self.__calculate_tax(
-            subtotal=pricing_breakdown['final_price'],
+            subtotal=pricing_breakdown.subtotal_after_loyalty.value,
             customer_address=customer.address.value
         )
 
-        # Step 6: Calculate final total
-        total_price = pricing_breakdown['final_price'] + shipping_cost + tax
+        # Step 6: Calculate final total 
+        base_amount = pricing_breakdown.subtotal_after_loyalty.value
+        total_price = base_amount + shipping_cost + tax
 
         # Step 7: Validate and process payment
         payment_method_enum = PaymentMethod(
@@ -159,6 +160,11 @@ class OrderService:
         if not is_valid:
             print(f"Payment failed: {error}")
             return None
+
+        # Step 7.5: Deduct loyalty points (like legacy system)
+        if pricing_breakdown.loyalty_points_used > 0:
+            new_loyalty_points = customer.loyalty_points - pricing_breakdown.loyalty_points_used
+            self.__customer_service.update_loyalty_points(customer_id, new_loyalty_points)
 
         # Step 8: Deduct inventory
         for product_id, quantity, _ in order_items:
@@ -184,7 +190,8 @@ class OrderService:
 
         # Step 10: Update customer order history and loyalty points
         self.__customer_service.add_order_to_history(customer_id, order_id)
-        points_earned = int(total_price * 0.1)  # 10% of total as points
+        # Award loyalty points like legacy: 1 point per dollar of ORIGINAL subtotal (before discounts)
+        points_earned = int(pricing_breakdown.original_subtotal.value)  # Match legacy: int(subtotal)
         self.__customer_service.add_loyalty_points(customer_id, points_earned)
 
         # Step 11: Send confirmation notification

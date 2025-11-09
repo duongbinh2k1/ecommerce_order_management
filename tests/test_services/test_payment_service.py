@@ -85,7 +85,8 @@ class TestPaymentService(unittest.TestCase):
         """Test successful payment processing."""
         payment_info = {
             "valid": True,
-            "card_number": "1234567890123456"
+            "card_number": "1234567890123456",
+            "amount": 100.0  # Add amount field
         }
         
         success, error = self.payment_service.process_payment(
@@ -112,7 +113,8 @@ class TestPaymentService(unittest.TestCase):
         """Test successful PayPal payment processing."""
         payment_info = {
             "valid": True,
-            "email": "user@example.com"
+            "email": "user@example.com",
+            "amount": 50.0  # Add amount field
         }
         
         success, error = self.payment_service.process_payment(
@@ -127,7 +129,8 @@ class TestPaymentService(unittest.TestCase):
         # First make a payment
         payment_info = {
             "valid": True,
-            "card_number": "1234567890123456"
+            "card_number": "1234567890123456",
+            "amount": 75.0  # Add amount field
         }
         
         # Use int order_id consistently

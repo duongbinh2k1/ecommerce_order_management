@@ -3,14 +3,15 @@
 from typing import Optional, Any
 from domain.enums.payment_method import PaymentMethod
 from domain.enums.payment_status import PaymentStatus
+from domain.models.payment_transaction import PaymentTransaction
 
 
 class PaymentService:
-    """Service for payment validation and processing."""
-
+    """Service for processing payments and managing payment history."""
+    
     def __init__(self) -> None:
-        """Initialize the payment service."""
-        self.__payment_history: list[dict[str, Any]] = []
+        """Initialize payment service."""
+        self.__payment_history: list[PaymentTransaction] = []
 
     def validate_payment(
         self,
@@ -66,13 +67,19 @@ class PaymentService:
         if not is_valid:
             return False, error
 
-        # Record payment
-        self.__payment_history.append({
-            'order_id': order_id,
-            'amount': amount,
-            'payment_method': payment_method,
-            'status': PaymentStatus.COMPLETED
-        })
+        # Check payment amount
+        provided_amount = payment_info.get("amount", 0)
+        if provided_amount < amount:
+            return False, "Insufficient payment amount"
+
+        # Record payment transaction
+        transaction = PaymentTransaction(
+            order_id=order_id,
+            amount=amount,
+            payment_method=payment_method,
+            status=PaymentStatus.COMPLETED
+        )
+        self.__payment_history.append(transaction)
 
         return True, None
 
@@ -93,20 +100,33 @@ class PaymentService:
         Returns:
             True if successful
         """
-        # Find original payment
-        for payment in self.__payment_history:
-            if payment['order_id'] == order_id and payment['status'] == 'completed':
-                # Record refund
-                self.__payment_history.append({
-                    'order_id': order_id,
-                    'amount': -amount,
-                    'payment_method': payment['payment_method'],
-                    'status': 'refunded',
-                    'reason': reason
-                })
-                return True
+        # Find original payment transaction
+        original_payment = None
+        for transaction in self.__payment_history:
+            if (transaction.order_id == order_id and 
+                not transaction.is_refund and
+                transaction.status == PaymentStatus.COMPLETED):
+                original_payment = transaction
+                break
 
-        return False
+        if not original_payment:
+            return False
+
+        # Check if refundable
+        if not original_payment.can_be_refunded():
+            return False
+
+        # Create refund transaction
+        refund_transaction = PaymentTransaction(
+            order_id=order_id,
+            amount=-amount,  # Negative for refund
+            payment_method=original_payment.payment_method,
+            status=PaymentStatus.REFUNDED,
+            reason=reason
+        )
+        self.__payment_history.append(refund_transaction)
+
+        return True
 
     def get_payment_history(self, order_id: int) -> list[dict[str, Any]]:
         """
@@ -116,9 +136,25 @@ class PaymentService:
             order_id: Order identifier
 
         Returns:
-            List of payment records
+            List of payment records (as dicts for backward compatibility)
+        """
+        transactions = [
+            transaction for transaction in self.__payment_history
+            if transaction.order_id == order_id
+        ]
+        return [transaction.to_dict() for transaction in transactions]
+
+    def get_payment_transactions(self, order_id: int) -> list[PaymentTransaction]:
+        """
+        Get payment transactions for an order.
+
+        Args:
+            order_id: Order identifier
+
+        Returns:
+            List of PaymentTransaction objects
         """
         return [
-            payment for payment in self.__payment_history
-            if payment['order_id'] == order_id
+            transaction for transaction in self.__payment_history
+            if transaction.order_id == order_id
         ]

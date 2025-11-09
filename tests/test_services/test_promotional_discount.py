@@ -57,8 +57,8 @@ class TestPromotionalDiscountStrategy(unittest.TestCase):
             self.promotion, 150.0, [self.order_item1], self.products  # type: ignore[arg-type]
         )
         
-        # 20% of $150 = $30
-        self.assertEqual(discount, 30.0)
+        # 20% rate = 0.2
+        self.assertEqual(discount, 0.2)
 
     def test_calculate_discount_expired_promotion(self) -> None:
         """Test discount calculation with expired promotion."""
@@ -85,8 +85,8 @@ class TestPromotionalDiscountStrategy(unittest.TestCase):
             self.promotion, 100.0, [self.order_item1], self.products  # type: ignore[arg-type]
         )
         
-        # 20% of $100 = $20
-        self.assertEqual(discount, 20.0)
+        # 20% rate = 0.2
+        self.assertEqual(discount, 0.2)
 
     def test_calculate_discount_specific_category_match(self) -> None:
         """Test discount calculation with specific category match."""
@@ -96,8 +96,8 @@ class TestPromotionalDiscountStrategy(unittest.TestCase):
             self.promotion, 150.0, [self.order_item1], self.products  # type: ignore[arg-type]
         )
         
-        # Product 1 is in electronics category, so discount applies
-        self.assertEqual(discount, 30.0)
+        # Product 1 is in electronics category, so 20% rate = 0.2
+        self.assertEqual(discount, 0.2)
 
     def test_calculate_discount_specific_category_no_match(self) -> None:
         """Test discount calculation with specific category no match."""
@@ -118,8 +118,8 @@ class TestPromotionalDiscountStrategy(unittest.TestCase):
             self.promotion, 150.0, [self.order_item1, self.order_item2], self.products  # type: ignore[arg-type]
         )
         
-        # Only product 1 matches electronics, but discount applies to entire order
-        self.assertEqual(discount, 30.0)
+        # Only product 1 matches electronics, but discount applies to entire order (20% rate = 0.2)
+        self.assertEqual(discount, 0.2)
 
     def test_calculate_discount_product_not_found(self) -> None:
         """Test discount calculation when product not found."""
@@ -149,8 +149,8 @@ class TestPromotionalDiscountStrategy(unittest.TestCase):
             self.promotion, 200.0, [self.order_item1], self.products  # type: ignore[arg-type]
         )
         
-        # 50% of $200 = $100
-        self.assertEqual(discount, 100.0)
+        # 50% rate = 0.5
+        self.assertEqual(discount, 0.5)
 
     def test_calculate_discount_zero_percentage(self) -> None:
         """Test discount calculation with zero percentage."""
@@ -170,8 +170,8 @@ class TestPromotionalDiscountStrategy(unittest.TestCase):
             self.promotion, 15.0, [self.order_item1], self.products  # type: ignore[arg-type]
         )
         
-        # 20% of $15 = $3
-        self.assertEqual(discount, 3.0)
+        # 20% rate = 0.2
+        self.assertEqual(discount, 0.2)
 
     def test_calculate_discount_category_case_sensitivity(self) -> None:
         """Test discount calculation with case-sensitive category matching."""

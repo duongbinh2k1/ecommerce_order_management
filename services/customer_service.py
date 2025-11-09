@@ -79,17 +79,44 @@ class CustomerService:
         customer = self.__repository.get(customer_id)
         if not customer:
             return False
-
-        # Create updated customer
-        new_loyalty_points = customer.loyalty_points + points
+        
+        new_points = customer.loyalty_points + points
         updated_customer = Customer(
             customer_id=customer.customer_id,
             name=customer.name,
             email=customer.email.value,
-            membership_tier=customer.membership_tier,
-            phone=customer.phone.value if customer.phone.value is not None else "",
+            membership_tier=customer.membership_tier.value,
+            phone=customer.phone.value or "",
             address=customer.address.value,
-            loyalty_points=new_loyalty_points,
+            loyalty_points=new_points,
+            order_history=customer.order_history
+        )
+        self.__repository.update(updated_customer)
+        return True
+
+    def update_loyalty_points(self, customer_id: int, new_points: int) -> bool:
+        """
+        Update customer loyalty points to specific value.
+
+        Args:
+            customer_id: The customer identifier
+            new_points: The new loyalty points value
+
+        Returns:
+            True if successful, False if customer not found
+        """
+        customer = self.__repository.get(customer_id)
+        if not customer:
+            return False
+        
+        updated_customer = Customer(
+            customer_id=customer.customer_id,
+            name=customer.name,
+            email=customer.email.value,
+            membership_tier=customer.membership_tier.value,
+            phone=customer.phone.value or "",
+            address=customer.address.value,
+            loyalty_points=new_points,
             order_history=customer.order_history
         )
         self.__repository.update(updated_customer)
@@ -120,7 +147,7 @@ class CustomerService:
             name=customer.name,
             email=customer.email.value,
             membership_tier=new_tier,
-            phone=customer.phone.value if customer.phone.value is not None else "",
+            phone=customer.phone.value or "",
             address=customer.address.value,
             loyalty_points=customer.loyalty_points,
             order_history=customer.order_history

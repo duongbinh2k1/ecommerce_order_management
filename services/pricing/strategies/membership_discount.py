@@ -9,21 +9,20 @@ class MembershipDiscountStrategy(DiscountStrategy):
 
     def calculate_discount(self, tier: MembershipTier, subtotal: float) -> float:
         """
-        Calculate membership discount.
+        Calculate membership discount rate.
 
         Args:
             tier: Customer membership tier
-            subtotal: Order subtotal
+            subtotal: Order subtotal (unused, kept for interface compatibility)
 
         Returns:
-            Discount amount
+            Discount rate (0.0 to 1.0)
         """
-        discount_rate = 0.0
         if tier == MembershipTier.GOLD:
-            discount_rate = 0.15
+            return 0.15
         elif tier == MembershipTier.SILVER:
-            discount_rate = 0.07
+            return 0.07
         elif tier == MembershipTier.BRONZE:
-            discount_rate = 0.03
-
-        return subtotal * discount_rate
+            return 0.03
+        
+        return 0.0

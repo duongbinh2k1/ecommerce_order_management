@@ -69,10 +69,17 @@ class TestOrderService(unittest.TestCase):
         self.customer_service.get_customer.return_value = self.customer
         self.product_service.get_product.return_value = self.product
         self.inventory_service.check_product_availability.return_value = True
-        self.pricing_service.apply_all_discounts.return_value = {
-            'final_price': 200.0,
-            'total_weight': 2.0
-        }
+        
+        # Mock PricingResult object instead of dict
+        from domain.value_objects.pricing_result import PricingResult
+        pricing_result = PricingResult(
+            original_subtotal=200.0,
+            loyalty_points_used=0,
+            subtotal_after_loyalty=200.0,
+            total_weight=2.0
+        )
+        self.pricing_service.apply_all_discounts.return_value = pricing_result
+        
         self.shipping_service.calculate_shipping_cost.return_value = 10.0
         self.payment_service.process_payment.return_value = (True, None)
         self.order_repository.get_next_id.return_value = 1000
@@ -148,10 +155,14 @@ class TestOrderService(unittest.TestCase):
         # This should return False to simulate insufficient stock
         self.inventory_service.check_product_availability.return_value = False
         # Mock pricing service in case it gets called before stock check fails
-        self.pricing_service.apply_all_discounts.return_value = {
-            'final_price': 2000.0,
-            'total_weight': 20.0
-        }
+        from domain.value_objects.pricing_result import PricingResult
+        pricing_result = PricingResult(
+            original_subtotal=2000.0,
+            loyalty_points_used=0,
+            subtotal_after_loyalty=2000.0,
+            total_weight=20.0
+        )
+        self.pricing_service.apply_all_discounts.return_value = pricing_result
         # Mock shipping service
         self.shipping_service.calculate_shipping_cost.return_value = 25.0
         # Mock payment service
@@ -175,10 +186,16 @@ class TestOrderService(unittest.TestCase):
         self.customer_service.get_customer.return_value = self.customer
         self.product_service.get_product.return_value = self.product
         self.inventory_service.check_product_availability.return_value = True
-        self.pricing_service.apply_all_discounts.return_value = {
-            'final_price': 200.0,
-            'total_weight': 2.0
-        }
+        
+        from domain.value_objects.pricing_result import PricingResult
+        pricing_result = PricingResult(
+            original_subtotal=200.0,
+            loyalty_points_used=0,
+            subtotal_after_loyalty=200.0,
+            total_weight=2.0
+        )
+        self.pricing_service.apply_all_discounts.return_value = pricing_result
+        
         self.shipping_service.calculate_shipping_cost.return_value = 10.0
         self.payment_service.process_payment.return_value = (False, "Payment failed")
         self.order_repository.get_next_id.return_value = 1000

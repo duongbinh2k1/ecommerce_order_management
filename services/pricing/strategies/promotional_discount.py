@@ -21,16 +21,16 @@ class PromotionalDiscountStrategy(DiscountStrategy):
         products: dict[int, 'Product']
     ) -> float:
         """
-        Calculate promotional discount.
+        Calculate promotional discount rate.
 
         Args:
             promotion: Promotion object (or None)
-            subtotal: Current subtotal
+            subtotal: Current subtotal for validation
             order_items: List of order items
             products: Dictionary of products
 
         Returns:
-            Discount amount
+            Discount rate (0.0 to 1.0, e.g., 0.15 for 15%)
         """
         if not promotion:
             return 0.0
@@ -53,6 +53,6 @@ class PromotionalDiscountStrategy(DiscountStrategy):
                     break
 
         if applicable:
-            return subtotal * (promotion.discount_percent / 100)
+            return promotion.discount_percent / 100
 
         return 0.0

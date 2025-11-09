@@ -8,19 +8,18 @@ class BulkDiscountStrategy(DiscountStrategy):
 
     def calculate_discount(self, total_items: int, subtotal: float) -> float:
         """
-        Calculate bulk discount.
+        Calculate bulk discount rate.
 
         Args:
             total_items: Total number of items in order
-            subtotal: Current subtotal
+            subtotal: Current subtotal (unused, kept for interface compatibility)
 
         Returns:
-            Discount amount
+            Discount rate (0.0 to 1.0)
         """
-        discount_rate = 0.0
         if total_items >= 10:
-            discount_rate = 0.05
+            return 0.05
         elif total_items >= 5:
-            discount_rate = 0.02
-
-        return subtotal * discount_rate
+            return 0.02
+        
+        return 0.0

@@ -1,7 +1,8 @@
 """Pricing Service - Coordinates all discount strategies."""
 
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from domain.value_objects.money import Money
+from domain.value_objects.pricing_result import PricingResult
 from services.pricing.strategies import (
     MembershipDiscountStrategy,
     PromotionalDiscountStrategy,
@@ -61,9 +62,12 @@ class PricingService:
         order_items: list['OrderItem'],
         products: dict[int, 'Product'],
         promotion: Optional['Promotion'] = None
-    ) -> dict[str, Any]:
+    ) -> PricingResult:
         """
         Apply all discount strategies and return pricing breakdown.
+        
+        Note: Following legacy system logic where discounts are applied multiplicatively
+        except for loyalty points which is additive.
 
         Args:
             customer: Customer placing the order
@@ -76,47 +80,43 @@ class PricingService:
         """
         subtotal, total_weight = self.calculate_subtotal(order_items, products)
 
-        # Apply membership discount
-        membership_discount = self.__membership_strategy.calculate_discount(
+        # Apply membership discount (multiplicative like legacy system)
+        membership_discount_rate = self.__membership_strategy.calculate_discount(
             tier=customer.membership_tier,
             subtotal=subtotal
         )
-        subtotal_after_membership = subtotal - membership_discount
+        subtotal_after_membership = subtotal * (1 - membership_discount_rate)
 
-        # Apply promotional discount
-        promo_discount = self.__promotional_strategy.calculate_discount(
+        # Apply promotional discount (multiplicative like legacy system)
+        promo_discount_rate = self.__promotional_strategy.calculate_discount(
             promotion=promotion,
-            subtotal=subtotal_after_membership,
+            subtotal=subtotal,
             order_items=order_items,
             products=products
         )
-        subtotal_after_promo = subtotal_after_membership - promo_discount
+        subtotal_after_promo = subtotal_after_membership * (1 - promo_discount_rate)
 
-        # Apply bulk discount
+        # Apply bulk discount (multiplicative like legacy system)
         total_items = sum(item.quantity for item in order_items)
-        bulk_discount = self.__bulk_strategy.calculate_discount(
+        bulk_discount_rate = self.__bulk_strategy.calculate_discount(
             total_items=total_items,
             subtotal=subtotal_after_promo
         )
-        subtotal_after_bulk = subtotal_after_promo - bulk_discount
+        subtotal_after_bulk = subtotal_after_promo * (1 - bulk_discount_rate)
 
-        # Apply loyalty points discount
+        # Apply loyalty points discount (additive like legacy system)
         loyalty_discount, points_used = self.__loyalty_strategy.calculate_discount(
             loyalty_points=customer.loyalty_points,
             subtotal=subtotal_after_bulk
         )
         final_price = subtotal_after_bulk - loyalty_discount
 
-        return {
-            'original_subtotal': subtotal,
-            'membership_discount': membership_discount,
-            'promotional_discount': promo_discount,
-            'bulk_discount': bulk_discount,
-            'loyalty_discount': loyalty_discount,
-            'loyalty_points_used': points_used,
-            'final_price': final_price,
-            'total_weight': total_weight
-        }
+        return PricingResult(
+            original_subtotal=subtotal,
+            loyalty_points_used=points_used,
+            subtotal_after_loyalty=final_price,
+            total_weight=total_weight
+        )
 
     def calculate_additional_discount(
         self,
