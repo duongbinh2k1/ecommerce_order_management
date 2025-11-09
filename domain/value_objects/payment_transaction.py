@@ -16,26 +16,26 @@ class PaymentTransaction:
         self,
         order_id: int,
         amount: float,
-        payment_method: PaymentMethod,
-        status: PaymentStatus,
+        payment_method: str,
+        status: str,
         created_at: Optional[datetime.datetime] = None
     ) -> None:
         """
         Initialize payment transaction.
-        
+
         Args:
             order_id: Associated order ID
-            amount: Payment amount  
-            payment_method: Payment method used
-            status: Transaction status
+            amount: Payment amount
+            payment_method: Payment method (raw value)
+            status: Transaction status (raw value)
             created_at: Transaction timestamp (defaults to now)
         """
         self.__validate(order_id, amount)
-        
+
         self.__order_id = order_id
-        self.__amount = Money(amount) 
-        self.__payment_method = payment_method
-        self.__status = status
+        self.__amount = Money(amount)
+        self.__payment_method = PaymentMethod(payment_method)
+        self.__status = PaymentStatus(status)
         self.__created_at = created_at or datetime.datetime.now()
 
     def __validate(

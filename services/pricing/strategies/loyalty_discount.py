@@ -1,32 +1,27 @@
 """Loyalty Points Discount Strategy - Discounts using customer loyalty points."""
 
-from services.pricing.strategies import DiscountStrategy
-
-
-class LoyaltyPointsDiscountStrategy(DiscountStrategy):
+class LoyaltyDiscountStrategyImpl:
     """Calculate discount based on loyalty points."""
 
-    def calculate_discount(
-        self,
-        loyalty_points: int,
-        subtotal: float
-    ) -> tuple[float, int]:
+    def calculate_discount(self, loyalty_points: int, current_subtotal: float) -> float:
         """
-        Calculate loyalty points discount.
+        Calculate loyalty points discount amount.
 
         Args:
             loyalty_points: Customer's loyalty points
-            subtotal: Current subtotal
+            current_subtotal: Current subtotal after all multiplicative discounts
 
         Returns:
-            Tuple of (discount_amount, points_used)
+            Discount amount
         """
         if loyalty_points < 100:
-            return 0.0, 0
-
-        max_discount = subtotal * 0.1
+            return 0.0
+        max_discount = current_subtotal * 0.1
         points_discount = loyalty_points * 0.01
-        discount = min(max_discount, points_discount)
-        points_used = int(discount * 100)
+        return min(max_discount, points_discount)
 
-        return discount, points_used
+    def calculate_points_used(self, discount_amount: float) -> int:
+        """
+        Calculate how many points were used for a given discount amount.
+        """
+        return int(discount_amount * 100)

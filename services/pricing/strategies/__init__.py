@@ -1,33 +1,71 @@
 """Discount strategies package - Strategy Pattern implementation."""
 
-from abc import ABC, abstractmethod
-from typing import Any
+from typing import Protocol, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from domain.models.customer import Customer
+    from domain.models.order_item import OrderItem
+    from domain.models.promotion import Promotion
+    from domain.models.product import Product
+    from domain.enums.membership_tier import MembershipTier
 
 
-class DiscountStrategy(ABC):
-    """Abstract base class for discount strategies (Open/Closed Principle)."""
+class MembershipDiscountStrategy(Protocol):
+    """Strategy for membership-based discounts."""
+    
+    def calculate_discount(self, tier: 'MembershipTier', subtotal: float) -> float:
+        """Calculate membership discount amount."""
+        ...
 
-    @abstractmethod
-    def calculate_discount(self, *args: Any, **kwargs: Any) -> Any:  # Can return float or tuple
-        """
-        Calculate discount amount.
 
-        Returns:
-            Discount amount (0 or positive float) or tuple for loyalty
-        """
-        raise NotImplementedError
+class BulkDiscountStrategy(Protocol):
+    """Strategy for bulk purchase discounts."""
+    
+    def calculate_discount(self, total_items: int, current_subtotal: float) -> float:
+        """Calculate bulk discount amount to subtract from current_subtotal."""
+        ...
+
+
+class PromotionalDiscountStrategy(Protocol):
+    """Strategy for promotional code discounts."""
+    
+    def calculate_discount(
+        self, 
+        promotion: Optional['Promotion'],
+        original_subtotal: float,
+        current_subtotal: float,  # After membership discount
+        order_items: list['OrderItem'], 
+        products: dict[int, 'Product']
+    ) -> float:
+        """Calculate promotional discount amount to subtract from current_subtotal."""
+        ...
+
+
+class LoyaltyDiscountStrategy(Protocol):
+    """Strategy for loyalty points discounts."""
+    
+    def calculate_discount(self, loyalty_points: int, current_subtotal: float) -> float:
+        """Calculate loyalty discount amount."""
+        ...
+    
+    def calculate_points_used(self, discount_amount: float) -> int:
+        """Calculate points used for discount amount."""
+        ...
 
 
 # Import all strategies for easy access
-from services.pricing.strategies.membership_discount import MembershipDiscountStrategy
-from services.pricing.strategies.promotional_discount import PromotionalDiscountStrategy
-from services.pricing.strategies.bulk_discount import BulkDiscountStrategy
-from services.pricing.strategies.loyalty_discount import LoyaltyPointsDiscountStrategy
+from services.pricing.strategies.membership_discount import MembershipDiscountStrategyImpl
+from services.pricing.strategies.promotional_discount import PromotionalDiscountStrategyImpl
+from services.pricing.strategies.bulk_discount import BulkDiscountStrategyImpl
+from services.pricing.strategies.loyalty_discount import LoyaltyDiscountStrategyImpl
 
 __all__ = [
-    'DiscountStrategy',
     'MembershipDiscountStrategy',
+    'BulkDiscountStrategy', 
     'PromotionalDiscountStrategy',
-    'BulkDiscountStrategy',
-    'LoyaltyPointsDiscountStrategy'
+    'LoyaltyDiscountStrategy',
+    'MembershipDiscountStrategyImpl',
+    'PromotionalDiscountStrategyImpl',
+    'BulkDiscountStrategyImpl',
+    'LoyaltyDiscountStrategyImpl'
 ]

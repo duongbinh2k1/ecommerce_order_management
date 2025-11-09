@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from services.product_service import ProductService
     from services.customer_service import CustomerService
     from services.pricing.pricing_service import PricingService
-    from services.payment_service import PaymentService
+    from services.payment.payment_service import PaymentService
     from services.shipping_service import ShippingService
     from services.shipment_service import ShipmentService
     from services.notification_service import NotificationService
@@ -116,7 +116,7 @@ class OrderService:
             order_item_objects.append(order_item)
             products[product_id] = product
 
-        # Step 3: Calculate pricing with all discounts
+
         # Get promotion from promo_code using PromotionService
         promotion = None
         if promo_code and self.__promotion_service:
@@ -132,7 +132,7 @@ class OrderService:
             promotion=promotion
         )
 
-        # Step 4: Calculate shipping cost
+
         shipping_cost = self.__shipping_service.calculate_shipping_cost(
             shipping_method=shipping_method,
             total_weight=pricing_breakdown.total_weight,
@@ -140,17 +140,17 @@ class OrderService:
             customer_tier=customer.membership_tier
         )
 
-        # Step 5: Calculate tax
+
         tax = self.__calculate_tax(
             subtotal=pricing_breakdown.subtotal_after_loyalty.value,
             customer_address=customer.address.value
         )
 
-        # Step 6: Calculate final total 
+
         base_amount = pricing_breakdown.subtotal_after_loyalty.value
         total_price = base_amount + shipping_cost + tax
 
-        # Step 7: Validate and process payment
+
         payment_method_enum = PaymentMethod(
             payment_info.get('type', PaymentMethod.CREDIT_CARD))
         order_id = self.__repository.get_next_id()
@@ -166,12 +166,12 @@ class OrderService:
             print(f"Payment failed: {error}")
             return None
 
-        # Step 7.5: Deduct loyalty points (like legacy system)
+
         if pricing_breakdown.loyalty_points_used > 0:
             new_loyalty_points = customer.loyalty_points - pricing_breakdown.loyalty_points_used
             self.__customer_service.update_loyalty_points(customer_id, new_loyalty_points)
 
-        # Step 8: Deduct inventory
+
         for product_id, quantity, _ in order_items:
             product = products[product_id]
             new_quantity = product.quantity_available - quantity
@@ -180,7 +180,7 @@ class OrderService:
             self.__inventory_service.log_inventory_change(
                 product_id, -quantity, "sale")
 
-        # Step 9: Create Order object
+
         order = Order(
             order_id=order_id,
             customer_id=customer_id,
@@ -193,19 +193,18 @@ class OrderService:
 
         self.__repository.add(order)
 
-        # Step 10: Update customer order history and loyalty points
+
         self.__customer_service.add_order_to_history(customer_id, order_id)
-        # Award loyalty points like legacy: 1 point per dollar of ORIGINAL subtotal (before discounts)
-        points_earned = int(pricing_breakdown.original_subtotal.value)  # Match legacy: int(subtotal)
+        points_earned = int(pricing_breakdown.original_subtotal.value)
         self.__customer_service.add_loyalty_points(customer_id, points_earned)
 
-        # Step 11: Send confirmation notification
+
         self.__notification_service.send_order_confirmation(customer, order)
 
-        # Step 12: Check for low stock and notify suppliers (match legacy system)
+
         for product_id, quantity, _ in order_items:
             product = products[product_id]
-            if product.quantity_available < 5:  # Low stock threshold like legacy
+            if product.quantity_available < 5:
                 self.__supplier_service.notify_supplier_reorder(
                     product_id, product.supplier_id)
 
@@ -270,11 +269,9 @@ class OrderService:
                     f"order_cancelled_{order_id}"
                 )
         
-        # Update order status to cancelled (like legacy system)
         order.status = OrderStatus.CANCELLED
         self.__repository.update(order)
         
-        # Send cancellation notification like legacy system
         customer = self.__customer_service.get_customer(order.customer_id)
         if customer:
             self.__notification_service.send_order_cancellation(
@@ -354,16 +351,13 @@ class OrderService:
         if not order:
             return None
 
-        # Update order status (like legacy system)
         order.status = new_status
         self.__repository.update(order)
 
-        # Send notification (like legacy system)
         customer = self.__customer_service.get_customer(order.customer_id)
         if customer:
             print(f"To: {customer.email}: Order {order_id} status changed to {new_status.value}")
 
-        # If shipped, create tracking (like legacy system)
         if new_status == OrderStatus.SHIPPED and not order.tracking_number:
             tracking_number = self.ship_order(order_id)
             if tracking_number:
@@ -405,7 +399,6 @@ class OrderService:
         # Store old price for display
         old_price = order.total_price.value
 
-        # Update order total price (like legacy system)
         order.total_price = new_price  # Setter expects int|float, not Money
         self.__repository.update(order)
 

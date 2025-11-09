@@ -5,6 +5,16 @@ Implements proper Dependency Injection pattern as required in Phase 5
 """
 import datetime
 from typing import Any, Optional
+from services.pricing.strategies import (
+    MembershipDiscountStrategy,
+    PromotionalDiscountStrategy,
+    BulkDiscountStrategy,
+    LoyaltyDiscountStrategy,
+    MembershipDiscountStrategyImpl,
+    PromotionalDiscountStrategyImpl,
+    BulkDiscountStrategyImpl,
+    LoyaltyDiscountStrategyImpl
+)
 
 from domain.models.order_item import OrderItem
 from domain.models.product import Product
@@ -19,7 +29,17 @@ from domain.enums.order_status import OrderStatus
 from domain.enums.product_category import ProductCategory
 from domain.enums.payment_method import PaymentMethod
 
-# Import all repositories
+# Import repository interfaces  
+from repositories.interfaces import (
+    ProductRepository,
+    CustomerRepository,
+    OrderRepository,
+    SupplierRepository,
+    PromotionRepository,
+    ShipmentRepository
+)
+
+# Import repository implementations
 from repositories import (
     InMemoryProductRepository,
     InMemoryCustomerRepository,
@@ -55,15 +75,27 @@ class OrderProcessor:
     and provides a clean, testable entry point to the application.
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        product_repository: Optional[ProductRepository] = None,
+        customer_repository: Optional[CustomerRepository] = None,
+        order_repository: Optional[OrderRepository] = None,
+        supplier_repository: Optional[SupplierRepository] = None,
+        promotion_repository: Optional[PromotionRepository] = None,
+        shipment_repository: Optional[ShipmentRepository] = None,
+        membership_strategy: Optional[MembershipDiscountStrategy] = None,
+        promotional_strategy: Optional[PromotionalDiscountStrategy] = None,
+        bulk_strategy: Optional[BulkDiscountStrategy] = None,
+        loyalty_strategy: Optional[LoyaltyDiscountStrategy] = None
+    ) -> None:
         """Initialize all dependencies using proper dependency injection."""
-        # Initialize repositories (Data Access Layer)
-        self._product_repository = InMemoryProductRepository()
-        self._customer_repository = InMemoryCustomerRepository()
-        self._order_repository = InMemoryOrderRepository()
-        self._supplier_repository = InMemorySupplierRepository()
-        self._promotion_repository = InMemoryPromotionRepository()
-        self._shipment_repository = InMemoryShipmentRepository()
+        # Initialize repositories (with default implementations if not provided)
+        self._product_repository = product_repository or InMemoryProductRepository()
+        self._customer_repository = customer_repository or InMemoryCustomerRepository()
+        self._order_repository = order_repository or InMemoryOrderRepository()
+        self._supplier_repository = supplier_repository or InMemorySupplierRepository()
+        self._promotion_repository = promotion_repository or InMemoryPromotionRepository()
+        self._shipment_repository = shipment_repository or InMemoryShipmentRepository()
 
         # Initialize services with repository injection (Dependency Injection pattern)
         self._product_service = ProductService(self._product_repository)
@@ -71,7 +103,14 @@ class OrderProcessor:
         self._customer_service = CustomerService(self._customer_repository)
         self._supplier_service = SupplierService(self._supplier_repository)
         self._promotion_service = PromotionService(self._promotion_repository)
-        self._pricing_service = PricingService()
+        
+        # Inject discount strategies (with defaults if not provided)
+        self._pricing_service = PricingService(
+            membership_strategy=membership_strategy or MembershipDiscountStrategyImpl(),
+            promotional_strategy=promotional_strategy or PromotionalDiscountStrategyImpl(),
+            bulk_strategy=bulk_strategy or BulkDiscountStrategyImpl(),
+            loyalty_strategy=loyalty_strategy or LoyaltyDiscountStrategyImpl()
+        )
         self._shipping_service = ShippingService()
         self._shipment_service = ShipmentService(self._shipment_repository)
         self._payment_service = PaymentService()

@@ -3,7 +3,7 @@ Test PaymentService - payment processing and validation
 Tests payment validation and processing logic
 """
 import unittest
-from services.payment_service import PaymentService
+from services.payment import PaymentService
 from domain.enums.payment_method import PaymentMethod
 
 

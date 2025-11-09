@@ -1,28 +1,26 @@
 """Membership Discount Strategy - Discounts based on customer tier."""
-
-from services.pricing.strategies import DiscountStrategy
 from domain.enums.membership_tier import MembershipTier
 
-
-class MembershipDiscountStrategy(DiscountStrategy):
+class MembershipDiscountStrategyImpl:
     """Calculate discount based on membership tier."""
 
     def calculate_discount(self, tier: MembershipTier, subtotal: float) -> float:
         """
-        Calculate membership discount rate.
+        Calculate membership discount amount.
 
         Args:
             tier: Customer membership tier
-            subtotal: Order subtotal (unused, kept for interface compatibility)
+            subtotal: Order subtotal
 
         Returns:
-            Discount rate (0.0 to 1.0)
+            Discount amount to subtract from subtotal
         """
         if tier == MembershipTier.GOLD:
-            return 0.15
+            rate = 0.15
         elif tier == MembershipTier.SILVER:
-            return 0.07
+            rate = 0.07
         elif tier == MembershipTier.BRONZE:
-            return 0.03
-        
-        return 0.0
+            rate = 0.03
+        else:
+            rate = 0.0
+        return subtotal - (subtotal * (1 - rate))

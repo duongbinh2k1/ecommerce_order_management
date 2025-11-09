@@ -1,25 +1,24 @@
 """Bulk Discount Strategy - Discounts for large quantity purchases."""
 
-from services.pricing.strategies import DiscountStrategy
-
-
-class BulkDiscountStrategy(DiscountStrategy):
+class BulkDiscountStrategyImpl:
     """Calculate discount based on bulk purchase."""
 
-    def calculate_discount(self, total_items: int, subtotal: float) -> float:
+    def calculate_discount(self, total_items: int, current_subtotal: float) -> float:
         """
-        Calculate bulk discount rate.
+        Calculate bulk discount amount.
+        Legacy logic: Apply multiplicatively to current subtotal.
 
         Args:
             total_items: Total number of items in order
-            subtotal: Current subtotal (unused, kept for interface compatibility)
+            current_subtotal: Current subtotal to apply discount to
 
         Returns:
-            Discount rate (0.0 to 1.0)
+            Discount amount to subtract from current_subtotal
         """
         if total_items >= 10:
-            return 0.05
+            rate = 0.05
         elif total_items >= 5:
-            return 0.02
-        
-        return 0.0
+            rate = 0.02
+        else:
+            rate = 0.0
+        return current_subtotal - (current_subtotal * (1 - rate))
