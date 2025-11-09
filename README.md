@@ -364,14 +364,24 @@ class SeasonalDiscountStrategyImpl:
             'winter': 0.20,  # 20% discount rate
             'summer': 0.15,  # 15% discount rate
         }
-        
         rate = seasonal_rates.get(season, 0)
         return subtotal * rate  # Returns discount amount
 
-# 2. Inject in OrderProcessor - No existing code modification needed!
+# 2. Inject in OrderProcessor
 processor = OrderProcessor(
     bulk_strategy=SeasonalDiscountStrategyImpl()  # Dependency injection
 )
+
+# 3. IMPORTANT: After injecting a new discount strategy, you MUST implement the calculation logic for this new discount type in PricingService (or the main discount handler).
+#    If you only inject the strategy but do not add calculation logic in PricingService, the new discount will NOT be applied to orders.
+#    For example: If PricingService uses a list of strategies, you need to add the new strategy to this list and ensure it is called when calculating the total discount.
+#    Or, if you add a new strategy as a separate field, you must update the apply_all_discounts method to subtract the new discount from the subtotal, just like other discount types:
+#
+#        # Apply new discount
+#        new_discount = self.__new_strategy.calculate_discount(...)
+#        subtotal_after_new = subtotal_after_previous - new_discount
+#
+#    This step is required for the discount to affect the final price.
 ```
 
 ### Adding New Payment Methods
