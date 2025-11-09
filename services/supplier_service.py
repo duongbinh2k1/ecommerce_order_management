@@ -110,7 +110,8 @@ class SupplierService:
 
     def list_all_suppliers(self) -> list[Supplier]:
         """Get all suppliers."""
-        return self.__repository.list_all()
+        suppliers_dict = self.__repository.get_all()
+        return list(suppliers_dict.values())
 
     def get_all_suppliers(self) -> dict[int, Supplier]:
         """

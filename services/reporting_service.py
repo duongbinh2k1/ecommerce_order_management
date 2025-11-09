@@ -166,7 +166,7 @@ class ReportingService:
         Returns:
             Dictionary of category -> total_revenue
         """
-        revenue_by_category = {}
+        revenue_by_category: dict[str, float] = {}
         orders = self.__order_service.get_all_orders()
         products = self.__product_service.get_all_products()
 
@@ -175,11 +175,12 @@ class ReportingService:
                 for item in order.items:
                     product = products.get(item.product_id)
                     if product:
-                        if product.category not in revenue_by_category:
-                            revenue_by_category[product.category] = 0.0
+                        category_key = product.category
+                        if category_key not in revenue_by_category:
+                            revenue_by_category[category_key] = 0.0
 
                         item_price = item.unit_price.value
-                        revenue_by_category[product.category] += (
+                        revenue_by_category[category_key] += (
                             item.quantity * item_price
                         )
 

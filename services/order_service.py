@@ -10,7 +10,6 @@ from domain.enums.shipping_method import ShippingMethod
 from domain.enums.membership_tier import MembershipTier
 from domain.enums.us_state import USState
 from repositories.interfaces.order_repository import OrderRepository
-from domain.value_objects.money import Money
 
 if TYPE_CHECKING:
     from services.product_service import ProductService
@@ -407,7 +406,7 @@ class OrderService:
         old_price = order.total_price.value
 
         # Update order total price (like legacy system)
-        order.total_price = Money(new_price)
+        order.total_price = new_price  # Setter expects int|float, not Money
         self.__repository.update(order)
 
         print(
